@@ -1,3 +1,12 @@
+Metadata-Version: 2.4
+Name: yoshkar-ola-public-mcp
+Version: 0.1.0
+Summary: Public MCP server for approved Yoshkar-Ola administration datasets
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fastmcp<4,>=2.14.3
+Requires-Dist: httpx<1,>=0.28
+
 # MCP-сервер открытых данных Йошкар-Олы
 
 Приватный репозиторий первого релиза MCP-сервера для открытых данных городского округа "Город Йошкар-Ола".
