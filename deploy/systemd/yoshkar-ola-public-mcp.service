@@ -1,0 +1,21 @@
+[Unit]
+Description=Yoshkar-Ola Public MCP
+After=network-online.target cpr-public-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/yoshkar-ola-public-mcp
+Environment=CPR_PUBLIC_API_BASE_URL=https://apiiola.yasg.ru/api/v1
+Environment=CPR_PUBLIC_API_TIMEOUT=20
+Environment=CPR_PUBLIC_API_CACHE_TTL=300
+Environment=MCP_HOST=127.0.0.1
+Environment=MCP_PORT=8001
+Environment=MCP_PATH=/mcp
+ExecStart=/opt/yoshkar-ola-public-mcp/.venv/bin/yoshkar-ola-public-mcp
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

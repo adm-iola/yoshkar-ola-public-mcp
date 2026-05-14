@@ -189,7 +189,7 @@ def main() -> None:
         transport="streamable-http",
         host=host,
         port=port,
-        streamable_http_path=path,
+        path=path,
         stateless_http=True,
     )
 
