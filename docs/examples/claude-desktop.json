@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "yoshkarOlaPublicData": {
+      "command": "npx",
+      "args": ["-y", "@iola_adm/yoshkar-ola-public-mcp"]
+    }
+  }
+}

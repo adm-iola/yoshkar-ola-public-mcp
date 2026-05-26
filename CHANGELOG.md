@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 - 2026-05-26
+
+- Added public HTTP endpoints `/mcp-health` and `/mcp-version`.
+- Added connection examples in `docs/examples/`.
+- Reworked `SECURITY.md` as a Russian public data and reporting policy.
+
 ## 0.1.3 - 2026-05-26
 
 - Added `list_data_layers` MCP tool.

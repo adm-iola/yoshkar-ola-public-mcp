@@ -28,6 +28,13 @@ Transport:
 streamable-http
 ```
 
+Проверка доступности и версии:
+
+```text
+https://apiiola.yasg.ru/mcp-health
+https://apiiola.yasg.ru/mcp-version
+```
+
 Для локальных MCP-клиентов также доступен transport `stdio` через команду:
 
 ```text
@@ -541,6 +548,16 @@ npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
 - `MCP_PATH` - путь MCP endpoint, по умолчанию `/mcp`.
 
 См. также `.env.example`.
+
+## Примеры
+
+Готовые примеры подключения находятся в `docs/examples/`:
+
+- `codex.md`;
+- `claude-desktop.json`;
+- `openai-responses-api.js`;
+- `python-fastmcp-client.py`;
+- `curl-public-api.md`.
 
 ## Безопасность
 

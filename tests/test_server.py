@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+from starlette.testclient import TestClient
 
 from yoshkar_ola_public_mcp import server
 
@@ -127,6 +128,15 @@ def test_server_info_exposes_versions_layers_and_update_commands() -> None:
     assert "install-skill codex" in result["update_commands"]["codex_skill"]
 
 
+def test_version_payload_is_shared_by_server_info_and_http_routes() -> None:
+    payload = server._version_payload()
+
+    assert payload["server_version"] == server.SERVER_VERSION
+    assert payload["skill_version"] == server.SKILL_VERSION
+    assert payload["npm_package"] == "@iola_adm/yoshkar-ola-public-mcp"
+    assert [layer["id"] for layer in payload["data_layers"]] == ["schools", "kindergartens"]
+
+
 def test_list_data_layers_returns_available_layers() -> None:
     result = server.list_data_layers()
 
@@ -167,3 +177,18 @@ def test_main_stdio_uses_stdio_transport(monkeypatch: pytest.MonkeyPatch) -> Non
     server.main_stdio()
 
     assert calls == [{"transport": "stdio"}]
+
+
+def test_http_health_and_version_routes() -> None:
+    app = server.mcp.http_app(path="/mcp", transport="streamable-http", stateless_http=True)
+
+    with TestClient(app) as client:
+        health = client.get("/mcp-health")
+        version = client.get("/mcp-version")
+
+    assert health.status_code == 200
+    assert health.json()["status"] == "ok"
+    assert health.json()["server_version"] == server.SERVER_VERSION
+    assert version.status_code == 200
+    assert version.json()["server_version"] == server.SERVER_VERSION
+    assert "status" not in version.json()

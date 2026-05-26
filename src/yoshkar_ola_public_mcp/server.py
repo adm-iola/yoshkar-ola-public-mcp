@@ -6,12 +6,14 @@ from typing import Any, Literal
 
 import httpx
 from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
-SERVER_VERSION = "0.1.3"
-SKILL_VERSION = "0.1.3"
+SERVER_VERSION = "0.1.4"
+SKILL_VERSION = "0.1.4"
 NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
 GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"
 
@@ -143,6 +145,17 @@ def _get_by_inn(dataset: DatasetName, inn: str) -> dict[str, Any]:
     return {"found": False, "item": None}
 
 
+def _version_payload() -> dict[str, Any]:
+    return {
+        "server_name": "Yoshkar-Ola Public Data",
+        "server_version": SERVER_VERSION,
+        "skill_version": SKILL_VERSION,
+        "npm_package": NPM_PACKAGE,
+        "mcp_endpoint": "https://apiiola.yasg.ru/mcp",
+        "data_layers": list(DATA_LAYERS),
+    }
+
+
 mcp = FastMCP(
     name="Yoshkar-Ola Public Data",
     instructions=(
@@ -189,15 +202,10 @@ def _guidance_text() -> str:
 def get_server_info() -> dict[str, Any]:
     """Получить версию сервера, доступные слои и команды обновления локального skill."""
     return {
-        "server_name": "Yoshkar-Ola Public Data",
-        "server_version": SERVER_VERSION,
+        **_version_payload(),
         "skill_name": "yoshkar-ola-open-data",
-        "skill_version": SKILL_VERSION,
-        "npm_package": NPM_PACKAGE,
-        "mcp_endpoint": "https://apiiola.yasg.ru/mcp",
         "guidance_resource_uri": GUIDANCE_RESOURCE_URI,
         "guidance_prompt": "yoshkar_ola_open_data_guidance",
-        "data_layers": list(DATA_LAYERS),
         "update_commands": {
             "codex_skill": f"npx -y {NPM_PACKAGE} install-skill codex",
             "codex_mcp": f"codex mcp add yoshkarOlaPublicDataNpm -- npx -y {NPM_PACKAGE}",
@@ -258,6 +266,16 @@ def open_data_guidance_resource() -> str:
 )
 def open_data_guidance_prompt() -> str:
     return _guidance_text()
+
+
+@mcp.custom_route("/mcp-health", methods=["GET"], include_in_schema=False)
+async def mcp_health(_: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok", **_version_payload()})
+
+
+@mcp.custom_route("/mcp-version", methods=["GET"], include_in_schema=False)
+async def mcp_version(_: Request) -> JSONResponse:
+    return JSONResponse(_version_payload())
 
 
 @mcp.tool

@@ -1,20 +1,36 @@
-# Security Policy
+# Безопасность и открытые данные
 
-## Supported Versions
+## Назначение
 
-Security reports are accepted for the current `main` branch.
+Этот проект предоставляет доступ к открытым данным городского округа
+"Город Йошкар-Ола" через MCP-интерфейс и публичный API.
 
-## Reporting a Vulnerability
+Сервер предназначен только для получения открытых данных. Он не предназначен
+для публикации закрытых сведений, персональных документов, служебной
+информации, учетных данных или технических секретов.
 
-Please report security issues through GitHub private vulnerability reporting
-or by contacting the repository maintainers.
+## Что делать при ошибке в данных
 
-Do not publish secrets, private data, access tokens, database URLs, personal
-documents, or other sensitive material in public issues.
+Если вы обнаружили неточность, устаревшие сведения или считаете, что какая-либо
+информация не должна быть доступна публично, сообщите сопровождающим проекта.
 
-## Scope
+Пожалуйста, не публикуйте в открытых issues:
 
-This project provides access to open datasets through an MCP interface.
+- пароли, токены, ключи доступа;
+- персональные документы;
+- закрытые служебные сведения;
+- ссылки на внутренние системы;
+- подробности, которые могут помочь злоупотреблению.
 
-If you believe published information should not be public, or you found a
-security issue, report it privately instead of opening a public issue.
+## Сообщения о проблемах безопасности
+
+Сообщайте о проблемах безопасности через GitHub private vulnerability reporting
+или приватный канал связи с сопровождающими проекта.
+
+Для обычных ошибок документации и публичных примеров можно использовать GitHub
+Issues.
+
+## Поддерживаемая версия
+
+Актуальной считается версия в ветке `main` и последняя опубликованная версия
+npm-пакета `@iola_adm/yoshkar-ola-public-mcp`.
