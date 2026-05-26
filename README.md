@@ -4,6 +4,11 @@
 
 # MCP-сервер открытых данных Йошкар-Олы
 
+<p>
+  <a href="https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp"><img src="https://img.shields.io/npm/v/%40iola_adm%2Fyoshkar-ola-public-mcp?label=npm" alt="npm package version"></a>
+  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/adm-iola/yoshkar-ola-public-mcp/ci.yml?branch=main&label=CI" alt="CI status"></a>
+</p>
+
 Публичный MCP-сервер для доступа к открытым данным городского округа
 "Город Йошкар-Ола".
 
@@ -427,6 +432,12 @@ node npm/bin/yoshkar-ola-public-mcp.js
 локальный `stdio`-сервер через `npx`. Wrapper не реализует отдельную копию
 бизнес-логики: он запускает `mcp-remote` и подключает локальный `stdio` к
 публичному endpoint `https://apiiola.yasg.ru/mcp`.
+
+Пакет опубликован в npm:
+
+```text
+https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp
+```
 
 Проверить пакет локально:
 
