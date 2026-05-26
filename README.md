@@ -178,7 +178,7 @@ entrypoint после установки пакета:
 yoshkar-ola-public-mcp-stdio
 ```
 
-## <img src="./docs/assets/icons/openai.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
+## <img src="./docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
 
 Для ChatGPT и OpenAI API есть три рабочих сценария.
 
