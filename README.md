@@ -6,6 +6,7 @@
 
 <p>
   <a href="https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp"><img src="https://img.shields.io/npm/v/%40iola_adm%2Fyoshkar-ola-public-mcp?label=npm" alt="npm package version"></a>
+  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/adm-iola/yoshkar-ola-public-mcp/ci.yml?branch=main&label=tests" alt="tests status"></a>
 </p>
 
 Публичный MCP-сервер для доступа к открытым данным городского округа
