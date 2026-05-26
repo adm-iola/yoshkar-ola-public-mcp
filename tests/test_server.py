@@ -127,6 +127,26 @@ def test_server_info_exposes_versions_layers_and_update_commands() -> None:
     assert "install-skill codex" in result["update_commands"]["codex_skill"]
 
 
+def test_list_data_layers_returns_available_layers() -> None:
+    result = server.list_data_layers()
+
+    assert result["total"] == 2
+    assert [item["id"] for item in result["items"]] == ["schools", "kindergartens"]
+
+
+def test_search_all_searches_every_available_layer() -> None:
+    result = server.search_all("Пчелка", limit_per_layer=500)
+
+    assert result["limit_per_layer"] == 50
+    assert result["layers_searched"] == 2
+    assert result["total"] == 1
+    assert result["results"][0]["layer"]["id"] == "schools"
+    assert result["results"][0]["total"] == 0
+    assert result["results"][1]["layer"]["id"] == "kindergartens"
+    assert result["results"][1]["total"] == 1
+    assert result["results"][1]["items"][0]["inn"] == "1215000001"
+
+
 def test_guidance_text_mentions_server_info() -> None:
     guidance = server.open_data_guidance_resource()
 

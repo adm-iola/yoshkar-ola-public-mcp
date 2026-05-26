@@ -10,8 +10,8 @@ from fastmcp import FastMCP
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
-SERVER_VERSION = "0.1.2"
-SKILL_VERSION = "0.1.2"
+SERVER_VERSION = "0.1.3"
+SKILL_VERSION = "0.1.3"
 NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
 GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"
 
@@ -202,6 +202,43 @@ def get_server_info() -> dict[str, Any]:
             "codex_skill": f"npx -y {NPM_PACKAGE} install-skill codex",
             "codex_mcp": f"codex mcp add yoshkarOlaPublicDataNpm -- npx -y {NPM_PACKAGE}",
         },
+    }
+
+
+@mcp.tool
+def list_data_layers() -> dict[str, Any]:
+    """Получить список доступных открытых слоев данных."""
+    return {
+        "total": len(DATA_LAYERS),
+        "items": list(DATA_LAYERS),
+    }
+
+
+@mcp.tool
+def search_all(query: str, limit_per_layer: int = 10) -> dict[str, Any]:
+    """Искать по всем доступным слоям данных."""
+    safe_limit = max(1, min(int(limit_per_layer), 50))
+    results = []
+
+    for layer in DATA_LAYERS:
+        layer_id = layer["id"]
+        if layer_id not in ("schools", "kindergartens"):
+            continue
+        search_result = _search(layer_id, query=query, limit=safe_limit)
+        results.append(
+            {
+                "layer": layer,
+                "total": search_result["total"],
+                "items": search_result["items"],
+            }
+        )
+
+    return {
+        "query": query,
+        "limit_per_layer": safe_limit,
+        "layers_searched": len(results),
+        "total": sum(result["total"] for result in results),
+        "results": results,
     }
 
 
