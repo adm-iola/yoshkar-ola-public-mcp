@@ -1,16 +1,15 @@
 <p align="center">
-  <img src="./docs/assets/readme-header.png" alt="MCP-сервер города Йошкар-Олы" width="100%">
+  <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/readme-header.png" alt="MCP-сервер города Йошкар-Олы" width="100%">
 </p>
 
 # MCP-сервер открытых данных Йошкар-Олы
 
-Публичный MCP-сервер для утвержденных открытых данных городского округа
+Публичный MCP-сервер для доступа к открытым данным городского округа
 "Город Йошкар-Ола".
 
 Сервер предоставляет внешним AI-инструментам структурированный доступ к
-утвержденным наборам данных городского округа "Город Йошкар-Ола". В первом
-релизе доступны только открытые данные, подготовленные для внешнего
-использования.
+открытым наборам данных городского округа "Город Йошкар-Ола". В первом релизе
+доступны только данные, подготовленные для внешнего использования.
 
 ## Доступный endpoint
 
@@ -55,11 +54,11 @@ https://apiiola.yasg.ru/api/v1
 Основной эталонный источник данных - "Цифровой мозг городского округа".
 Данные в нем поддерживаются в актуальном состоянии за счет регулярных
 автоматизированных обновлений из государственных информационных систем,
-отраслевых информационных ресурсов и иных утвержденных источников.
+отраслевых информационных ресурсов и иных официальных источников.
 
 ## Возвращаемые поля
 
-Для школ и детских садов возвращается только заранее утвержденный набор
+Для школ и детских садов возвращается только заранее определенный набор
 публичных полей:
 
 - `display_order` - порядковый номер для отображения;
@@ -191,7 +190,7 @@ yoshkar-ola-public-mcp-stdio
 npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
 
-## <img src="./docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
+## <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
 
 Для ChatGPT и OpenAI API есть три рабочих сценария.
 
@@ -245,7 +244,7 @@ REST-доступ к первым слоям, выбирайте GPT Actions.
 - https://developers.openai.com/api/docs/guides/tools-connectors-mcp
 - https://help.openai.com/en/articles/9442513-configuring-actions-in-gpts
 
-## <img src="./docs/assets/icons/codex.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Codex
+## <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/icons/codex.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Codex
 
 Команды ниже соответствуют локальной справке Codex CLI `codex mcp add --help`:
 для удаленного streamable HTTP-сервера используется `--url`, для локального
@@ -288,7 +287,7 @@ New-Item -ItemType Directory -Force -Path $skills
 Copy-Item -Recurse -Force .\skills\yoshkar-ola-open-data "$skills\yoshkar-ola-open-data"
 ```
 
-## <img src="./docs/assets/icons/claude.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Claude
+## <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/icons/claude.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Claude
 
 Для Claude.ai, Claude Desktop и Claude Code используйте один из двух вариантов,
 если он доступен в вашей версии клиента:
@@ -334,7 +333,7 @@ Claude Project instructions, Claude Skills или другой механизм 
 - https://docs.anthropic.com/en/docs/claude-code/mcp
 - https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector
 
-## <img src="./docs/assets/icons/gigachat.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в GigaChat
+## <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/icons/gigachat.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в GigaChat
 
 Для GigaChat-сценариев используйте MCP через агентный слой, например
 GigaChain/LangChain MCP adapters:
@@ -352,7 +351,7 @@ Skill-инструкцию используйте как system prompt / instruc
 
 - https://developers.sber.ru/docs/ru/gigachain/tutorials/agent-gigachat-mcp
 
-## <img src="./docs/assets/icons/yandexgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Yandex AI Studio / YandexGPT
+## <img src="https://raw.githubusercontent.com/adm-iola/yoshkar-ola-public-mcp/main/docs/assets/icons/yandexgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Yandex AI Studio / YandexGPT
 
 В Yandex AI Studio можно подключать MCP-серверы через MCP Hub. Для внешнего
 MCP-сервера используйте endpoint:
@@ -465,7 +464,7 @@ npm publish --access public
 
 ## Безопасность
 
-Сервер предназначен только для получения утвержденных открытых данных.
+Сервер предназначен только для получения открытых данных городского округа.
 Если вы обнаружили неточность в данных или считаете, что какая-либо
 информация не должна быть опубликована, сообщите об этом сопровождающим
 проекта приватным каналом.

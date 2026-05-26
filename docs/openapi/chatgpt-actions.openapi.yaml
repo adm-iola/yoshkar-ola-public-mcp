@@ -3,9 +3,8 @@ info:
   title: Yoshkar-Ola Public Open Data API
   version: 0.1.0
   description: >
-    Public API for approved open datasets of the urban district
-    "Город Йошкар-Ола". The first release provides municipal schools and
-    municipal kindergartens.
+    Public API for open datasets of the urban district "Город Йошкар-Ола".
+    The first release provides municipal schools and municipal kindergartens.
 servers:
   - url: https://apiiola.yasg.ru/api/v1
 paths:
@@ -13,7 +12,7 @@ paths:
     get:
       operationId: listSchools
       summary: Получить список муниципальных школ
-      description: Возвращает утвержденный открытый набор данных по муниципальным школам городского округа "Город Йошкар-Ола".
+      description: Возвращает открытый набор данных по муниципальным школам городского округа "Город Йошкар-Ола".
       responses:
         "200":
           description: Список муниципальных школ.
@@ -25,7 +24,7 @@ paths:
     get:
       operationId: listKindergartens
       summary: Получить список муниципальных детских садов
-      description: Возвращает утвержденный открытый набор данных по муниципальным детским садам городского округа "Город Йошкар-Ола".
+      description: Возвращает открытый набор данных по муниципальным детским садам городского округа "Город Йошкар-Ола".
       responses:
         "200":
           description: Список муниципальных детских садов.
