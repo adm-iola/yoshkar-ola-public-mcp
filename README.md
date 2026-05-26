@@ -34,7 +34,7 @@ yoshkar-ola-public-mcp-stdio
 можно запускать без Python-установки:
 
 ```bash
-npx -y @adm-iola/yoshkar-ola-public-mcp
+npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
 
 ## Данные первого релиза
@@ -188,7 +188,7 @@ yoshkar-ola-public-mcp-stdio
 Или npm-wrapper, который проксирует локальный `stdio` в публичный remote MCP:
 
 ```bash
-npx -y @adm-iola/yoshkar-ola-public-mcp
+npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
 
 ## <img src="./docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
@@ -269,7 +269,7 @@ codex mcp list
 Локальный stdio MCP через npm:
 
 ```bash
-codex mcp add yoshkarOlaPublicDataNpm -- npx -y @adm-iola/yoshkar-ola-public-mcp
+codex mcp add yoshkarOlaPublicDataNpm -- npx -y @iola_adm/yoshkar-ola-public-mcp
 codex mcp list
 ```
 
@@ -318,7 +318,7 @@ https://apiiola.yasg.ru/mcp
   "mcpServers": {
     "yoshkarOlaPublicData": {
       "command": "npx",
-      "args": ["-y", "@adm-iola/yoshkar-ola-public-mcp"]
+      "args": ["-y", "@iola_adm/yoshkar-ola-public-mcp"]
     }
   }
 }
@@ -444,10 +444,10 @@ npm adduser
 npm publish --access public
 ```
 
-Публикацию нужно выполнять из npm-аккаунта, у которого есть права на scope
-`@adm-iola`.
+Публикацию нужно выполнять из npm-аккаунта `iola_adm` или аккаунта, у которого
+есть права на scope `@iola_adm`.
 
-Команда `npx -y @adm-iola/yoshkar-ola-public-mcp` начнет работать из любого
+Команда `npx -y @iola_adm/yoshkar-ola-public-mcp` начнет работать из любого
 проекта после публикации пакета в npm. До публикации пакет можно проверять
 локально через `npm start`.
 

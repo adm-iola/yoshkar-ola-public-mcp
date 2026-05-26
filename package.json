@@ -1,5 +1,5 @@
 {
-  "name": "@adm-iola/yoshkar-ola-public-mcp",
+  "name": "@iola_adm/yoshkar-ola-public-mcp",
   "version": "0.1.0",
   "description": "STDIO launcher for the Yoshkar-Ola Public MCP remote server.",
   "license": "MIT",
