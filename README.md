@@ -30,6 +30,13 @@ streamable-http
 yoshkar-ola-public-mcp-stdio
 ```
 
+После публикации npm-пакета локальный `stdio`-прокси к публичному MCP endpoint
+можно запускать без Python-установки:
+
+```bash
+npx -y @adm-iola/yoshkar-ola-public-mcp
+```
+
 ## Данные первого релиза
 
 Сейчас через MCP-сервер доступны:
@@ -172,10 +179,16 @@ https://apiiola.yasg.ru/mcp
 открытые публичные данные.
 
 Если клиент работает только с локальными MCP-серверами, используйте `stdio`
-entrypoint после установки пакета:
+entrypoint после установки Python-пакета:
 
 ```text
 yoshkar-ola-public-mcp-stdio
+```
+
+Или npm-wrapper, который проксирует локальный `stdio` в публичный remote MCP:
+
+```bash
+npx -y @adm-iola/yoshkar-ola-public-mcp
 ```
 
 ## <img src="./docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
@@ -253,6 +266,13 @@ codex mcp add yoshkarOlaPublicDataLocal -- yoshkar-ola-public-mcp-stdio
 codex mcp list
 ```
 
+Локальный stdio MCP через npm:
+
+```bash
+codex mcp add yoshkarOlaPublicDataNpm -- npx -y @adm-iola/yoshkar-ola-public-mcp
+codex mcp list
+```
+
 Skill для Codex находится в каталоге:
 
 ```text
@@ -286,6 +306,19 @@ https://apiiola.yasg.ru/mcp
   "mcpServers": {
     "yoshkarOlaPublicData": {
       "command": "yoshkar-ola-public-mcp-stdio"
+    }
+  }
+}
+```
+
+- локальный MCP через npm-wrapper:
+
+```json
+{
+  "mcpServers": {
+    "yoshkarOlaPublicData": {
+      "command": "npx",
+      "args": ["-y", "@adm-iola/yoshkar-ola-public-mcp"]
     }
   }
 }
@@ -376,11 +409,54 @@ $env:MCP_PATH = "/mcp"
 .\.venv\Scripts\yoshkar-ola-public-mcp-stdio.exe
 ```
 
+Запустить локальный `stdio`-прокси через npm:
+
+```bash
+npm install
+npm start
+```
+
+Или напрямую:
+
+```bash
+node npm/bin/yoshkar-ola-public-mcp.js
+```
+
+## npm-пакет
+
+Репозиторий содержит npm-wrapper для MCP-клиентов, которым удобнее запускать
+локальный `stdio`-сервер через `npx`. Wrapper не реализует отдельную копию
+бизнес-логики: он запускает `mcp-remote` и подключает локальный `stdio` к
+публичному endpoint `https://apiiola.yasg.ru/mcp`.
+
+Проверить пакет локально:
+
+```bash
+npm install
+npm test
+npm pack --dry-run
+```
+
+Опубликовать пакет:
+
+```bash
+npm adduser
+npm publish --access public
+```
+
+Публикацию нужно выполнять из npm-аккаунта, у которого есть права на scope
+`@adm-iola`.
+
+Команда `npx -y @adm-iola/yoshkar-ola-public-mcp` начнет работать из любого
+проекта после публикации пакета в npm. До публикации пакет можно проверять
+локально через `npm start`.
+
 ## Переменные окружения
 
 - `CPR_PUBLIC_API_BASE_URL` - базовый URL публичного API, по умолчанию `https://apiiola.yasg.ru/api/v1`;
 - `CPR_PUBLIC_API_TIMEOUT` - timeout HTTP-запросов к API в секундах, по умолчанию `20`;
 - `CPR_PUBLIC_API_CACHE_TTL` - TTL кэша в секундах, по умолчанию `300`;
+- `YOSHKAR_OLA_PUBLIC_MCP_URL` - remote MCP endpoint для npm-wrapper, по умолчанию `https://apiiola.yasg.ru/mcp`;
 - `MCP_HOST` - host MCP-сервера, по умолчанию `127.0.0.1`;
 - `MCP_PORT` - port MCP-сервера, по умолчанию `8001`;
 - `MCP_PATH` - путь MCP endpoint, по умолчанию `/mcp`.
