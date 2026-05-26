@@ -16,6 +16,7 @@ dev = [
 
 [project.scripts]
 yoshkar-ola-public-mcp = "yoshkar_ola_public_mcp.server:main"
+yoshkar-ola-public-mcp-stdio = "yoshkar_ola_public_mcp.server:main_stdio"
 
 [build-system]
 requires = ["setuptools>=69", "wheel"]

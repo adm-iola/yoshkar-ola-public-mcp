@@ -127,9 +127,9 @@ def _get_by_inn(dataset: DatasetName, inn: str) -> dict[str, Any]:
 mcp = FastMCP(
     name="Yoshkar-Ola Public Data",
     instructions=(
-        "Публичный MCP-сервер администрации городского округа Йошкар-Ола. "
-        "Сервер предоставляет только заранее одобренные открытые данные: школы и детские сады. "
-        "Источник данных: публичный API ЦПР и открытые сведения ФНС России."
+        "MCP-сервер открытых данных городского округа \"Город Йошкар-Ола\". "
+        "Сервер предоставляет доступ к утвержденным наборам открытых данных. "
+        "Основной эталонный источник данных - \"Цифровой мозг городского округа\"."
     ),
     version="0.1.0",
 )
@@ -173,11 +173,11 @@ def get_kindergarten_by_inn(inn: str) -> dict[str, Any]:
 
 @mcp.tool
 def get_data_update_info() -> dict[str, Any]:
-    """Получить дату последнего обновления данных ФНС/ЕГРЮЛ в публичном API."""
+    """Получить дату последнего обновления открытых данных."""
     payload = _get_json("fns-egrul/last-update")
     return {
         "last_updated_at": payload.get("last_updated_at"),
-        "source": "ФНС России / ЕГРЮЛ через публичный API ЦПР",
+        "source": "Публичный API открытых данных городского округа",
     }
 
 
@@ -192,6 +192,10 @@ def main() -> None:
         path=path,
         stateless_http=True,
     )
+
+
+def main_stdio() -> None:
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":

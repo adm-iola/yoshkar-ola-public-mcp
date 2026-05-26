@@ -112,5 +112,18 @@ def test_data_update_info_is_minimal() -> None:
 
     assert result == {
         "last_updated_at": "2026-05-25T02:10:37Z",
-        "source": "ФНС России / ЕГРЮЛ через публичный API ЦПР",
+        "source": "Публичный API открытых данных городского округа",
     }
+
+
+def test_main_stdio_uses_stdio_transport(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[dict[str, Any]] = []
+
+    def fake_run(**kwargs: Any) -> None:
+        calls.append(kwargs)
+
+    monkeypatch.setattr(server.mcp, "run", fake_run)
+
+    server.main_stdio()
+
+    assert calls == [{"transport": "stdio"}]

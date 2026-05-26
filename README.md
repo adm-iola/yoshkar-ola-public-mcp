@@ -20,6 +20,12 @@ Transport:
 streamable-http
 ```
 
+Для локальных MCP-клиентов также доступен transport `stdio` через команду:
+
+```text
+yoshkar-ola-public-mcp-stdio
+```
+
 ## Данные первого релиза
 
 Сейчас через MCP-сервер доступны:
@@ -142,12 +148,12 @@ https://apiiola.yasg.ru/api/v1
 
 ### `get_data_update_info`
 
-Возвращает дату последнего обновления данных ФНС/ЕГРЮЛ.
+Возвращает дату последнего обновления открытых данных.
 
 Пример запроса:
 
 ```text
-Когда последний раз обновлялись данные ФНС?
+Когда последний раз обновлялись данные?
 ```
 
 ## Подключение в MCP-клиенте
@@ -160,6 +166,119 @@ https://apiiola.yasg.ru/mcp
 
 Авторизация на первом этапе не требуется, потому что сервер отдает только
 открытые публичные данные.
+
+Если клиент работает только с локальными MCP-серверами, используйте `stdio`
+entrypoint после установки пакета:
+
+```text
+yoshkar-ola-public-mcp-stdio
+```
+
+## Подключение в Codex
+
+Команды ниже соответствуют локальной справке Codex CLI `codex mcp add --help`:
+для удаленного streamable HTTP-сервера используется `--url`, для локального
+`stdio`-сервера команда указывается после `--`.
+
+Remote MCP:
+
+```bash
+codex mcp add yoshkarOlaPublicData --url https://apiiola.yasg.ru/mcp
+codex mcp list
+```
+
+Локальный stdio MCP:
+
+```bash
+python -m pip install -e .
+codex mcp add yoshkarOlaPublicDataLocal -- yoshkar-ola-public-mcp-stdio
+codex mcp list
+```
+
+Skill для Codex находится в каталоге:
+
+```text
+skills/yoshkar-ola-open-data/SKILL.md
+```
+
+Чтобы использовать его локально, скопируйте каталог skill в директорию skills
+вашего Codex-профиля. Пример для PowerShell:
+
+```powershell
+$skills = "$env:USERPROFILE\.codex\skills"
+New-Item -ItemType Directory -Force -Path $skills
+Copy-Item -Recurse -Force .\skills\yoshkar-ola-open-data "$skills\yoshkar-ola-open-data"
+```
+
+## Подключение в Claude
+
+Для Claude.ai, Claude Desktop и Claude Code используйте один из двух вариантов,
+если он доступен в вашей версии клиента:
+
+- remote connector / custom connector:
+
+```text
+https://apiiola.yasg.ru/mcp
+```
+
+- локальный MCP через `stdio` в конфигурации Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "yoshkarOlaPublicData": {
+      "command": "yoshkar-ola-public-mcp-stdio"
+    }
+  }
+}
+```
+
+Skill-инструкцию из `skills/yoshkar-ola-open-data/SKILL.md` можно добавить в
+Claude Project instructions, Claude Skills или другой механизм проектных
+инструкций, если он доступен в используемом клиенте.
+
+Официальная документация Anthropic по MCP:
+
+- https://docs.anthropic.com/en/docs/mcp
+- https://docs.anthropic.com/en/docs/claude-code/mcp
+- https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector
+
+## Подключение в GigaChat
+
+Для GigaChat-сценариев используйте MCP через агентный слой, например
+GigaChain/LangChain MCP adapters:
+
+- для локального запуска используйте команду `yoshkar-ola-public-mcp-stdio`;
+- для удаленного запуска используйте публичный endpoint
+  `https://apiiola.yasg.ru/mcp`, если выбранный MCP-клиентский слой
+  поддерживает streamable HTTP;
+- если конкретная интеграция ожидает SSE, используйте совместимый MCP gateway
+  или proxy между клиентом и этим сервером.
+
+Skill-инструкцию используйте как system prompt / instructions для агента.
+
+Официальный пример Sber/GigaChain:
+
+- https://developers.sber.ru/docs/ru/gigachain/tutorials/agent-gigachat-mcp
+
+## Подключение в Yandex AI Studio / YandexGPT
+
+В Yandex AI Studio можно подключать MCP-серверы через MCP Hub. Для внешнего
+MCP-сервера используйте endpoint:
+
+```text
+https://apiiola.yasg.ru/mcp
+```
+
+Если сценарий строится не через MCP Hub, а через function calling, реализуйте
+тонкий слой функций, который вызывает инструменты этого MCP-сервера и
+возвращает результат модели. Skill-инструкцию из
+`skills/yoshkar-ola-open-data/SKILL.md` используйте как системную инструкцию
+агента.
+
+Официальная документация Yandex Cloud:
+
+- https://yandex.cloud/ru/docs/ai-studio/concepts/mcp-hub/
 
 ## Локальный запуск
 
@@ -187,6 +306,18 @@ $env:MCP_PATH = "/mcp"
 .\.venv\Scripts\yoshkar-ola-public-mcp.exe
 ```
 
+Запустить локальный stdio transport:
+
+```bash
+.venv/bin/yoshkar-ola-public-mcp-stdio
+```
+
+На Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\yoshkar-ola-public-mcp-stdio.exe
+```
+
 ## Переменные окружения
 
 - `CPR_PUBLIC_API_BASE_URL` - базовый URL публичного API, по умолчанию `https://apiiola.yasg.ru/api/v1`;
@@ -207,7 +338,7 @@ $env:MCP_PATH = "/mcp"
 
 ## Ограничения
 
-Этот MCP-сервер не является полным реестром всех данных ЦПР. Он публикует
+Этот MCP-сервер не является полным реестром всех данных ЦПР. Он предоставляет
 только те наборы и поля, которые явно добавлены в код и одобрены для
 открытого доступа.
 
