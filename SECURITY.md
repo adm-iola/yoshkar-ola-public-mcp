@@ -12,11 +12,9 @@ or by contacting the repository maintainers.
 Do not publish secrets, private data, access tokens, database URLs, personal
 documents, or other sensitive material in public issues.
 
-## Security Model
+## Scope
 
-This server exposes only approved public datasets. It does not accept SQL from
-users, does not connect to internal databases, and returns only fields listed
-in the server-side allowlist.
+This project publishes approved open datasets through an MCP interface.
 
-If you believe an endpoint exposes a field that should not be public, report it
-as a security issue.
+If you believe published information should not be public, or you found a
+security issue, report it privately instead of opening a public issue.
