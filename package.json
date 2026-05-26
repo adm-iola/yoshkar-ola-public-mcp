@@ -12,7 +12,7 @@
     "url": "https://github.com/adm-iola/yoshkar-ola-public-mcp/issues"
   },
   "bin": {
-    "yoshkar-ola-public-mcp": "./npm/bin/yoshkar-ola-public-mcp.js"
+    "yoshkar-ola-public-mcp": "npm/bin/yoshkar-ola-public-mcp.js"
   },
   "files": [
     "npm/bin",
