@@ -10,8 +10,27 @@ from fastmcp import FastMCP
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
+SERVER_VERSION = "0.1.2"
+SKILL_VERSION = "0.1.2"
+NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
+GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"
 
 DatasetName = Literal["schools", "kindergartens"]
+
+DATA_LAYERS = (
+    {
+        "id": "schools",
+        "name": "Муниципальные школы",
+        "status": "available",
+        "category": "Образование",
+    },
+    {
+        "id": "kindergartens",
+        "name": "Муниципальные детские сады",
+        "status": "available",
+        "category": "Образование",
+    },
+)
 
 PUBLIC_FIELDS = (
     "display_order",
@@ -131,8 +150,77 @@ mcp = FastMCP(
         "Сервер предоставляет доступ к открытым наборам данных. "
         "Основной эталонный источник данных - \"Цифровой мозг городского округа\"."
     ),
-    version="0.1.0",
+    version=SERVER_VERSION,
 )
+
+
+def _guidance_text() -> str:
+    return f"""# Открытые данные городского округа "Город Йошкар-Ола"
+
+Актуальная версия инструкций: {SKILL_VERSION}.
+
+Используй MCP-инструменты этого сервера, когда пользователь спрашивает о
+наборах открытых данных городского округа "Город Йошкар-Ола".
+
+Доступные наборы первого релиза:
+
+- муниципальные школы;
+- муниципальные детские сады.
+
+Правила:
+
+- не отвечай из памяти, если сведения можно получить через MCP;
+- не добавляй телефоны, адреса, сайты, ФИО, ИНН, лицензии и другие реквизиты,
+  которых нет в ответе MCP;
+- если данных нет в открытом наборе, прямо скажи, что в доступном открытом
+  наборе такие сведения не найдены;
+- если найдено несколько похожих организаций, покажи короткий список
+  совпадений и уточни, какая запись нужна пользователю;
+- если пользователь сообщает о неточности, не исправляй данные самостоятельно,
+  а скажи, что сведения нужно проверить в источнике и передать сопровождающим
+  набора данных.
+
+Для проверки актуальности локального skill используй инструмент
+`get_server_info`.
+"""
+
+
+@mcp.tool
+def get_server_info() -> dict[str, Any]:
+    """Получить версию сервера, доступные слои и команды обновления локального skill."""
+    return {
+        "server_name": "Yoshkar-Ola Public Data",
+        "server_version": SERVER_VERSION,
+        "skill_name": "yoshkar-ola-open-data",
+        "skill_version": SKILL_VERSION,
+        "npm_package": NPM_PACKAGE,
+        "mcp_endpoint": "https://apiiola.yasg.ru/mcp",
+        "guidance_resource_uri": GUIDANCE_RESOURCE_URI,
+        "guidance_prompt": "yoshkar_ola_open_data_guidance",
+        "data_layers": list(DATA_LAYERS),
+        "update_commands": {
+            "codex_skill": f"npx -y {NPM_PACKAGE} install-skill codex",
+            "codex_mcp": f"codex mcp add yoshkarOlaPublicDataNpm -- npx -y {NPM_PACKAGE}",
+        },
+    }
+
+
+@mcp.resource(
+    GUIDANCE_RESOURCE_URI,
+    name="yoshkar_ola_open_data_guidance",
+    description="Актуальные инструкции по работе с открытыми данными городского округа.",
+    mime_type="text/markdown",
+)
+def open_data_guidance_resource() -> str:
+    return _guidance_text()
+
+
+@mcp.prompt(
+    name="yoshkar_ola_open_data_guidance",
+    description="Инструкции для агента по работе с открытыми данными городского округа.",
+)
+def open_data_guidance_prompt() -> str:
+    return _guidance_text()
 
 
 @mcp.tool

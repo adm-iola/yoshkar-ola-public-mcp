@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Yoshkar-Ola Public Open Data API
-  version: 0.1.0
+  version: 0.1.2
   description: >
     Public API for open datasets of the urban district "Город Йошкар-Ола".
     The first release provides municipal schools and municipal kindergartens.

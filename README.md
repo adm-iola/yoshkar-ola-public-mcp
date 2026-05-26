@@ -41,6 +41,12 @@ Python-установки через npm:
 npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
 
+Локальный Codex skill можно установить или обновить одной командой:
+
+```bash
+npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
+```
+
 ## Данные первого релиза
 
 Сейчас через MCP-сервер доступны:
@@ -171,6 +177,17 @@ https://apiiola.yasg.ru/api/v1
 Когда последний раз обновлялись данные?
 ```
 
+### `get_server_info`
+
+Возвращает версию MCP-сервера, актуальную версию skill, доступные слои данных,
+URI resource с инструкциями и команды обновления локального skill.
+
+Пример запроса:
+
+```text
+Какая версия MCP-сервера и какие слои данных доступны?
+```
+
 ## Подключение в MCP-клиенте
 
 Если клиент поддерживает remote MCP / streamable HTTP, укажите:
@@ -283,8 +300,14 @@ Skill для Codex находится в каталоге:
 skills/yoshkar-ola-open-data/SKILL.md
 ```
 
-Чтобы использовать его локально, скопируйте каталог skill в директорию skills
-вашего Codex-профиля. Пример для PowerShell:
+Чтобы использовать его локально, установите skill через npm:
+
+```bash
+npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
+```
+
+Или скопируйте каталог skill в директорию skills вашего Codex-профиля. Пример
+для PowerShell:
 
 ```powershell
 $skills = "$env:USERPROFILE\.codex\skills"
@@ -439,6 +462,14 @@ node npm/bin/yoshkar-ola-public-mcp.js
 https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp
 ```
 
+Основные команды:
+
+```bash
+npx -y @iola_adm/yoshkar-ola-public-mcp
+npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
+npx -y @iola_adm/yoshkar-ola-public-mcp check-updates
+```
+
 Проверить пакет локально:
 
 ```bash
@@ -459,6 +490,20 @@ npm publish --access public
 
 Команда `npx -y @iola_adm/yoshkar-ola-public-mcp` работает из любого проекта.
 Локальную сборку перед публикацией можно проверять через `npm start`.
+
+## Обновления skill
+
+Новые MCP-инструменты и слои данных становятся доступны пользователям remote
+MCP после деплоя сервера. Локальные skills у пользователей сами не
+перезаписываются, поэтому сервер предоставляет инструмент `get_server_info`,
+resource `yoshkar-ola://guidance/open-data` и prompt
+`yoshkar_ola_open_data_guidance` с актуальными инструкциями.
+
+Для обновления Codex skill:
+
+```bash
+npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
+```
 
 ## Переменные окружения
 

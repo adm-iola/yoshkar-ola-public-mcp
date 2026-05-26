@@ -1,7 +1,7 @@
 [project]
 name = "yoshkar-ola-public-mcp"
-version = "0.1.0"
-description = "Public MCP server for approved Yoshkar-Ola administration datasets"
+version = "0.1.2"
+description = "Public MCP server for open datasets of the urban district Yoshkar-Ola"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

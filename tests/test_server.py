@@ -116,6 +116,26 @@ def test_data_update_info_is_minimal() -> None:
     }
 
 
+def test_server_info_exposes_versions_layers_and_update_commands() -> None:
+    result = server.get_server_info()
+
+    assert result["server_version"] == server.SERVER_VERSION
+    assert result["skill_version"] == server.SKILL_VERSION
+    assert result["npm_package"] == "@iola_adm/yoshkar-ola-public-mcp"
+    assert result["guidance_resource_uri"] == server.GUIDANCE_RESOURCE_URI
+    assert [layer["id"] for layer in result["data_layers"]] == ["schools", "kindergartens"]
+    assert "install-skill codex" in result["update_commands"]["codex_skill"]
+
+
+def test_guidance_text_mentions_server_info() -> None:
+    guidance = server.open_data_guidance_resource()
+
+    assert server.SKILL_VERSION in guidance
+    assert "get_server_info" in guidance
+    assert "муниципальные школы" in guidance
+    assert server.open_data_guidance_prompt() == guidance
+
+
 def test_main_stdio_uses_stdio_transport(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[dict[str, Any]] = []
 
