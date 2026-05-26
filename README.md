@@ -510,8 +510,8 @@ npm adduser
 npm publish --access public
 ```
 
-Публикацию нужно выполнять из npm-аккаунта `iola_adm` или аккаунта, у которого
-есть права на scope `@iola_adm`.
+Основной процесс публикации описан в `docs/release.md`. Для автоматической
+публикации npm нужен GitHub secret `NPM_TOKEN`.
 
 Команда `npx -y @iola_adm/yoshkar-ola-public-mcp` работает из любого проекта.
 Локальную сборку перед публикацией можно проверять через `npm start`.
