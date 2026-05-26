@@ -12,10 +12,17 @@ Environment=CPR_PUBLIC_API_CACHE_TTL=300
 Environment=MCP_HOST=127.0.0.1
 Environment=MCP_PORT=8001
 Environment=MCP_PATH=/mcp
+Environment=PYTHONDONTWRITEBYTECODE=1
 ExecStart=/opt/yoshkar-ola-public-mcp/.venv/bin/yoshkar-ola-public-mcp
 Restart=always
 RestartSec=5
-User=root
+User=yoshkar-mcp
+Group=yoshkar-mcp
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadOnlyPaths=/opt/yoshkar-ola-public-mcp
 
 [Install]
 WantedBy=multi-user.target

@@ -9,6 +9,11 @@ dependencies = [
     "httpx>=0.28,<1",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+]
+
 [project.scripts]
 yoshkar-ola-public-mcp = "yoshkar_ola_public_mcp.server:main"
 
