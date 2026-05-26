@@ -6,7 +6,6 @@
 
 <p>
   <a href="https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp"><img src="https://img.shields.io/npm/v/%40iola_adm%2Fyoshkar-ola-public-mcp?label=npm" alt="npm package version"></a>
-  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/adm-iola/yoshkar-ola-public-mcp/ci.yml?branch=main&label=CI" alt="CI status"></a>
 </p>
 
 Публичный MCP-сервер для доступа к открытым данным городского округа
@@ -34,8 +33,8 @@ streamable-http
 yoshkar-ola-public-mcp-stdio
 ```
 
-После публикации npm-пакета локальный `stdio`-прокси к публичному MCP endpoint
-можно запускать без Python-установки:
+Локальный `stdio`-прокси к публичному MCP endpoint можно запускать без
+Python-установки через npm:
 
 ```bash
 npx -y @iola_adm/yoshkar-ola-public-mcp
@@ -447,7 +446,7 @@ npm test
 npm pack --dry-run
 ```
 
-Опубликовать пакет:
+Опубликовать новую версию пакета:
 
 ```bash
 npm adduser
@@ -457,9 +456,8 @@ npm publish --access public
 Публикацию нужно выполнять из npm-аккаунта `iola_adm` или аккаунта, у которого
 есть права на scope `@iola_adm`.
 
-Команда `npx -y @iola_adm/yoshkar-ola-public-mcp` начнет работать из любого
-проекта после публикации пакета в npm. До публикации пакет можно проверять
-локально через `npm start`.
+Команда `npx -y @iola_adm/yoshkar-ola-public-mcp` работает из любого проекта.
+Локальную сборку перед публикацией можно проверять через `npm start`.
 
 ## Переменные окружения
 
