@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: Yoshkar-Ola Public Open Data API
+  version: 0.1.0
+  description: >
+    Public API for approved open datasets of the urban district
+    "Город Йошкар-Ола". The first release provides municipal schools and
+    municipal kindergartens.
+servers:
+  - url: https://apiiola.yasg.ru/api/v1
+paths:
+  /schools:
+    get:
+      operationId: listSchools
+      summary: Получить список муниципальных школ
+      description: Возвращает утвержденный открытый набор данных по муниципальным школам городского округа "Город Йошкар-Ола".
+      responses:
+        "200":
+          description: Список муниципальных школ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetResponse"
+  /kindergartens:
+    get:
+      operationId: listKindergartens
+      summary: Получить список муниципальных детских садов
+      description: Возвращает утвержденный открытый набор данных по муниципальным детским садам городского округа "Город Йошкар-Ола".
+      responses:
+        "200":
+          description: Список муниципальных детских садов.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetResponse"
+components:
+  schemas:
+    DatasetResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicEducationOrganization"
+      required:
+        - data
+    PublicEducationOrganization:
+      type: object
+      additionalProperties: true
+      properties:
+        display_order:
+          type: integer
+          nullable: true
+          description: Порядковый номер для отображения.
+        inn:
+          type: string
+          nullable: true
+          description: ИНН организации.
+        legal_address:
+          type: string
+          nullable: true
+          description: Юридический адрес.
+        address:
+          type: string
+          nullable: true
+          description: Фактический или публичный адрес.
+        phone:
+          type: string
+          nullable: true
+          description: Телефон.
+        email:
+          type: string
+          nullable: true
+          description: Электронная почта.
+        website:
+          type: string
+          nullable: true
+          description: Официальный сайт.
+        fns_kpp:
+          type: string
+          nullable: true
+          description: КПП по данным ФНС.
+        fns_ogrn:
+          type: string
+          nullable: true
+          description: ОГРН по данным ФНС.
+        fns_full_name:
+          type: string
+          nullable: true
+          description: Полное наименование.
+        fns_short_name:
+          type: string
+          nullable: true
+          description: Сокращенное наименование.
+        fns_entity_type:
+          type: string
+          nullable: true
+          description: Тип юридического лица.
+        fns_registration_date:
+          type: string
+          nullable: true
+          description: Дата регистрации юридического лица.
+        fns_region_name:
+          type: string
+          nullable: true
+          description: Регион.
+        fns_status:
+          type: string
+          nullable: true
+          description: Статус юридического лица.
+        fns_address:
+          type: string
+          nullable: true
+          description: Юридический адрес по данным ФНС.
+        fns_head_position:
+          type: string
+          nullable: true
+          description: Должность руководителя.
+        fns_head_name:
+          type: string
+          nullable: true
+          description: ФИО руководителя.
+        license_number:
+          type: string
+          nullable: true
+          description: Номер образовательной лицензии.
+        license_date:
+          type: string
+          nullable: true
+          description: Дата лицензии или последнего изменения.
+        license_order:
+          type: string
+          nullable: true
+          description: Приказ или основание лицензии.
+        license_term:
+          type: string
+          nullable: true
+          description: Срок действия лицензии.
+        license_status:
+          type: string
+          nullable: true
+          description: Статус лицензии.
+        license_issuing_organ:
+          type: string
+          nullable: true
+          description: Орган, выдавший лицензию.

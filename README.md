@@ -178,6 +178,60 @@ entrypoint после установки пакета:
 yoshkar-ola-public-mcp-stdio
 ```
 
+## <img src="./docs/assets/icons/openai.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
+
+Для ChatGPT и OpenAI API есть три рабочих сценария.
+
+### ChatGPT Apps / custom MCP app
+
+В ChatGPT Web сервер подключается как remote MCP app. Используйте публичный
+endpoint:
+
+```text
+https://apiiola.yasg.ru/mcp
+```
+
+Локальный `stdio` transport для ChatGPT напрямую не подходит: ChatGPT
+подключается к удаленным MCP-серверам. Если сервер находится в приватной сети
+или на машине разработчика, используйте совместимый tunnel/remote gateway.
+
+### Custom GPT через Actions
+
+Для GPT Actions можно подключить не MCP endpoint, а обычный публичный REST API.
+Готовая OpenAPI-схема находится здесь:
+
+```text
+docs/openapi/chatgpt-actions.openapi.yaml
+```
+
+В GPT editor откройте `Actions`, создайте новое action и вставьте эту схему.
+Авторизация для первого релиза не требуется.
+
+Важно: в настройках одного Custom GPT используется либо `Apps`, либо
+`Actions`. Если нужен именно MCP, выбирайте custom MCP app; если нужен простой
+REST-доступ к первым слоям, выбирайте GPT Actions.
+
+### OpenAI Responses API
+
+В OpenAI API remote MCP подключается как инструмент `mcp`:
+
+```json
+{
+  "type": "mcp",
+  "server_label": "yoshkar_ola_public_data",
+  "server_description": "Открытые данные городского округа \"Город Йошкар-Ола\".",
+  "server_url": "https://apiiola.yasg.ru/mcp",
+  "require_approval": "never"
+}
+```
+
+Официальная документация OpenAI:
+
+- https://help.openai.com/en/articles/11487775-connectors-in-chatgpt
+- https://help.openai.com/en/articles/12584461-developer-mode-apps-and-full-mcp-connectors-in-chatgpt-beta.svgz
+- https://developers.openai.com/api/docs/guides/tools-connectors-mcp
+- https://help.openai.com/en/articles/9442513-configuring-actions-in-gpts
+
 ## <img src="./docs/assets/icons/codex.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в Codex
 
 Команды ниже соответствуют локальной справке Codex CLI `codex mcp add --help`:
