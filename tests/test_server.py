@@ -144,6 +144,48 @@ def test_list_data_layers_returns_available_layers() -> None:
     assert [item["id"] for item in result["items"]] == ["schools", "kindergartens"]
 
 
+def test_layer_list_returns_search_schemas_and_filters_category() -> None:
+    result = server.layer_list(category="образование")
+
+    assert result["total"] == 2
+    assert result["items"][0]["id"] == "schools"
+    assert result["items"][0]["endpoint"] == "schools"
+    assert "fns_head_name" in result["items"][0]["search_fields"]
+    assert result["items"][1]["id"] == "kindergartens"
+    assert server.layer_list(category="нет") == {"total": 0, "items": []}
+
+
+def test_layer_schema_returns_one_layer() -> None:
+    result = server.layer_schema("schools")
+
+    assert result["id"] == "schools"
+    assert result["category"] == "Образование"
+    assert "школ" in result["aliases"]
+
+
+def test_layer_query_scores_head_name_matches() -> None:
+    result = server.layer_query("schools", "в какой школе директор Кузнецов", limit=5)
+
+    assert result["layer"]["id"] == "schools"
+    assert result["terms"] == ["кузнецов"]
+    assert result["total"] == 1
+    assert result["items"][0]["inn"] == "1215066204"
+
+
+def test_layer_get_returns_by_inn_or_query() -> None:
+    by_inn = server.layer_get("kindergartens", inn="1215-000001")
+    by_query = server.layer_get("kindergartens", query="Пчелка")
+
+    assert by_inn["found"] is True
+    assert by_inn["item"]["inn"] == "1215000001"
+    assert by_query["found"] is True
+    assert by_query["item"]["fns_short_name"] == "МДОУ Детский сад Пчелка"
+
+
+def test_open_data_layers_resource_matches_layer_list() -> None:
+    assert server.open_data_layers_resource() == server.layer_list()
+
+
 def test_search_all_searches_every_available_layer() -> None:
     result = server.search_all("Пчелка", limit_per_layer=500)
 

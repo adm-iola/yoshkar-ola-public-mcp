@@ -12,10 +12,11 @@ from starlette.responses import JSONResponse
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
-SERVER_VERSION = "0.1.4"
-SKILL_VERSION = "0.1.4"
+SERVER_VERSION = "0.1.5"
+SKILL_VERSION = "0.1.5"
 NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
 GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"
+LAYERS_RESOURCE_URI = "yoshkar-ola://layers"
 
 DatasetName = Literal["schools", "kindergartens"]
 
@@ -25,14 +26,25 @@ DATA_LAYERS = (
         "name": "Муниципальные школы",
         "status": "available",
         "category": "Образование",
+        "endpoint": "schools",
+        "aliases": ["школ", "лицей", "гимнази"],
+        "search_fields": ["inn", "fns_full_name", "fns_short_name", "fns_head_name", "legal_address", "address", "email", "website"],
+        "person_fields": ["fns_head_name"],
+        "source_fields": ["id", "name", "inn"],
     },
     {
         "id": "kindergartens",
         "name": "Муниципальные детские сады",
         "status": "available",
         "category": "Образование",
+        "endpoint": "kindergartens",
+        "aliases": ["сад", "детсад", "детский сад", "доу", "мбдоу"],
+        "search_fields": ["inn", "fns_full_name", "fns_short_name", "fns_head_name", "legal_address", "address", "email", "website"],
+        "person_fields": ["fns_head_name"],
+        "source_fields": ["id", "name", "inn"],
     },
 )
+DATA_LAYER_BY_ID = {layer["id"]: layer for layer in DATA_LAYERS}
 
 PUBLIC_FIELDS = (
     "display_order",
@@ -80,13 +92,13 @@ def _get_json(path: str) -> Any:
     return data
 
 
-def _dataset_path(dataset: DatasetName) -> str:
-    if dataset not in ("schools", "kindergartens"):
+def _dataset_path(dataset: str) -> str:
+    if dataset not in DATA_LAYER_BY_ID:
         raise ValueError(f"Unknown dataset: {dataset}")
-    return dataset
+    return str(DATA_LAYER_BY_ID[dataset]["endpoint"])
 
 
-def _load_items(dataset: DatasetName) -> list[dict[str, Any]]:
+def _load_items(dataset: str) -> list[dict[str, Any]]:
     payload = _get_json(_dataset_path(dataset))
     items = payload.get("data", [])
     if not isinstance(items, list):
@@ -115,9 +127,104 @@ def _matches(item: dict[str, Any], query: str) -> bool:
             "address",
             "email",
             "website",
-        )
+    )
     ).casefold()
     return needle in haystack
+
+
+def _layer_schema(layer_id: str) -> dict[str, Any]:
+    if layer_id not in DATA_LAYER_BY_ID:
+        raise ValueError(f"Unknown layer: {layer_id}")
+    layer = DATA_LAYER_BY_ID[layer_id]
+    return {
+        "id": layer["id"],
+        "name": layer["name"],
+        "status": layer["status"],
+        "category": layer["category"],
+        "endpoint": layer["endpoint"],
+        "aliases": layer["aliases"],
+        "search_fields": layer["search_fields"],
+        "person_fields": layer["person_fields"],
+        "source_fields": layer["source_fields"],
+    }
+
+
+def _list_layer_schemas(category: str | None = None) -> list[dict[str, Any]]:
+    normalized_category = (category or "").strip().casefold()
+    schemas = [_layer_schema(str(layer["id"])) for layer in DATA_LAYERS]
+    if normalized_category:
+        schemas = [
+            schema
+            for schema in schemas
+            if str(schema.get("category") or "").casefold() == normalized_category
+        ]
+    return schemas
+
+
+def _extract_terms(query: str) -> list[str]:
+    stop_words = {
+        "в", "во", "на", "по", "и", "а", "ну", "так", "слушай", "скажи", "подскажи",
+        "какие", "какая", "какой", "каком", "есть", "найди", "покажи", "контакты",
+        "адрес", "телефон", "школы", "школа", "школе", "сад", "детский", "детские",
+        "сады", "улица", "ул", "директор", "руководитель",
+    }
+    cleaned = "".join(ch.casefold() if ch.isalnum() else " " for ch in query)
+    return [term for term in cleaned.split() if (term not in stop_words and (len(term) > 2 or term.isdigit()))]
+
+
+def _score_item(item: dict[str, Any], terms: list[str]) -> int:
+    if not terms:
+        return 1
+    haystack = " ".join(str(item.get(field) or "") for field in PUBLIC_FIELDS).casefold()
+    head = str(item.get("fns_head_name") or "").casefold()
+    score = 0
+    for term in terms:
+        if term in haystack:
+            score += 1
+        if term in head:
+            score += 5
+    return score
+
+
+def _query_layer(layer_id: str, query: str, limit: int = 20) -> dict[str, Any]:
+    if layer_id not in DATA_LAYER_BY_ID:
+        raise ValueError(f"Unknown layer: {layer_id}")
+    terms = _extract_terms(query)
+    scored = [
+        {"item": item, "score": _score_item(item, terms)}
+        for item in _load_items(layer_id)
+    ]
+    items = [
+        entry["item"]
+        for entry in sorted(scored, key=lambda entry: entry["score"], reverse=True)
+        if entry["score"] > 0
+    ]
+    page = _paginate(items, limit=limit, offset=0)
+    return {
+        "layer": _layer_schema(layer_id),
+        "query": query,
+        "terms": terms,
+        "total": page["total"],
+        "limit": page["limit"],
+        "items": page["items"],
+    }
+
+
+def _get_layer_item(layer_id: str, inn: str = "", query: str = "") -> dict[str, Any]:
+    if layer_id not in DATA_LAYER_BY_ID:
+        raise ValueError(f"Unknown layer: {layer_id}")
+
+    normalized_inn = "".join(ch for ch in str(inn) if ch.isdigit())
+    if normalized_inn:
+        return _get_by_inn(layer_id, normalized_inn)
+
+    cleaned_query = query.strip()
+    if not cleaned_query:
+        return {"found": False, "item": None}
+
+    result = _query_layer(layer_id, cleaned_query, limit=1)
+    items = result["items"]
+    return {"found": bool(items), "item": items[0] if items else None}
 
 
 def _paginate(items: list[dict[str, Any]], limit: int, offset: int) -> dict[str, Any]:
@@ -195,6 +302,10 @@ def _guidance_text() -> str:
 
 Для проверки актуальности локального skill используй инструмент
 `get_server_info`.
+
+Для работы со слоями используй универсальные инструменты `layer_list`,
+`layer_schema`, `layer_query` и `layer_get`; список схем также доступен в
+resource `yoshkar-ola://layers`.
 """
 
 
@@ -220,6 +331,34 @@ def list_data_layers() -> dict[str, Any]:
         "total": len(DATA_LAYERS),
         "items": list(DATA_LAYERS),
     }
+
+
+@mcp.tool
+def layer_list(category: str | None = None) -> dict[str, Any]:
+    """Получить список универсальных слоев данных и их поисковых схем."""
+    items = _list_layer_schemas(category=category)
+    return {
+        "total": len(items),
+        "items": items,
+    }
+
+
+@mcp.tool
+def layer_schema(layer: str) -> dict[str, Any]:
+    """Получить схему универсального слоя данных по идентификатору."""
+    return _layer_schema(layer)
+
+
+@mcp.tool
+def layer_query(layer: str, query: str, limit: int = 20) -> dict[str, Any]:
+    """Найти записи в универсальном слое данных по текстовому запросу."""
+    return _query_layer(layer, query=query, limit=limit)
+
+
+@mcp.tool
+def layer_get(layer: str, inn: str = "", query: str = "") -> dict[str, Any]:
+    """Получить одну запись универсального слоя по ИНН или ближайшему текстовому совпадению."""
+    return _get_layer_item(layer, inn=inn, query=query)
 
 
 @mcp.tool
@@ -258,6 +397,16 @@ def search_all(query: str, limit_per_layer: int = 10) -> dict[str, Any]:
 )
 def open_data_guidance_resource() -> str:
     return _guidance_text()
+
+
+@mcp.resource(
+    LAYERS_RESOURCE_URI,
+    name="yoshkar_ola_open_data_layers",
+    description="Список универсальных слоев открытых данных и их поисковых схем.",
+    mime_type="application/json",
+)
+def open_data_layers_resource() -> dict[str, Any]:
+    return layer_list()
 
 
 @mcp.prompt(

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5 - 2026-05-27
+
+- Added generic layer MCP tools: `layer_list`, `layer_schema`, `layer_query` and `layer_get`.
+- Added `yoshkar-ola://layers` resource with searchable layer schemas.
+- Updated the Codex skill to prefer MCP layer tools for future datasets.
+
 ## 0.1.4 - 2026-05-26
 
 - Added public HTTP endpoints `/mcp-health` and `/mcp-version`.
