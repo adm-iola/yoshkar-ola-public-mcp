@@ -240,6 +240,10 @@ URI resource с инструкциями и команды обновления 
 - `layer_get` - получение одной записи по ИНН или ближайшему совпадению.
 - `layer_answer_context` - компактный RAG-контекст с фактами, источниками и
   правилами ответа для модели.
+- `layer_stats` - статистика заполненности публичных полей слоя;
+- `layer_facets` - частотный список значений публичного поля;
+- `quality_summary` и `quality_findings` - проверки качества данных;
+- `mcp_diagnostics` - подробная диагностика MCP, API, cache, tools и слоев.
 
 Список схем также доступен как MCP resource:
 
@@ -536,6 +540,8 @@ npx -y @iola_adm/yoshkar-ola-public-mcp doctor
 npx -y @iola_adm/yoshkar-ola-public-mcp tools
 npx -y @iola_adm/yoshkar-ola-public-mcp call layer_query '{"layer":"schools","query":"директор Кузнецов","limit":1}'
 npx -y @iola_adm/yoshkar-ola-public-mcp call layer_answer_context '{"question":"в какой школе директор Кузнецов","limit":3}'
+npx -y @iola_adm/yoshkar-ola-public-mcp call layer_stats '{"layer":"schools"}'
+npx -y @iola_adm/yoshkar-ola-public-mcp call quality_summary '{}'
 npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
 npx -y @iola_adm/yoshkar-ola-public-mcp check-updates
 ```

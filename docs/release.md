@@ -38,6 +38,12 @@ corresponding optional secrets are empty. The deploy job uploads the release
 tree with `tar | ssh`, installs the Python package in the existing venv,
 restarts systemd and verifies `/mcp-version` plus MCP tools.
 
+Runtime diagnostics are available at:
+
+```text
+https://apiiola.yasg.ru/mcp-diagnostics
+```
+
 ## Runtime
 
 The npm wrapper requires Node.js `>=22.5.0`. CI, publish jobs and local release

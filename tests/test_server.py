@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import pytest
@@ -145,7 +146,18 @@ def test_contract_info_exposes_layer_capabilities() -> None:
     assert result["contract_version"] == server.CONTRACT_VERSION
     assert result["layer_count"] == 2
     assert "layer_suggest" in result["tools"]
+    assert "quality_summary" in result["tools"]
     assert server.LAYERS_RESOURCE_URI in result["resources"]
+
+
+def test_layer_registry_files_match_schema_requirements() -> None:
+    schema = json.loads(server.LAYER_SCHEMA_PATH.read_text(encoding="utf-8"))
+    required = set(schema["required"])
+
+    for file_path in server.LAYERS_DIR.glob("*.json"):
+        layer = json.loads(file_path.read_text(encoding="utf-8"))
+        assert required.issubset(layer)
+        server._validate_layer_definition(layer, file_path)
 
 
 def test_list_data_layers_returns_available_layers() -> None:
@@ -212,9 +224,44 @@ def test_layer_answer_context_returns_facts_and_guidance() -> None:
     result = server.layer_answer_context("в какой школе директор Кузнецов", limit=2)
 
     assert result["contract_version"] == server.CONTRACT_VERSION
+    assert result["answer_type"] == "single_match"
+    assert result["needs_clarification"] is False
+    assert result["confidence_summary"]["max"] > 0
     assert result["facts"][0]["layer"] == "schools"
     assert result["facts"][0]["head"] == "Кузнецов Александр Иванович"
+    assert "Кузнецов Александр Иванович" in result["recommended_answer_ru"]
     assert "Не добавляй реквизиты" in result["answer_guidance"]
+
+
+def test_layer_answer_context_no_match() -> None:
+    result = server.layer_answer_context("школа с директором Несуществующий", layer="schools", limit=2)
+
+    assert result["answer_type"] == "no_match"
+    assert result["facts"] == []
+    assert result["recommended_answer_ru"] == "В доступных открытых данных такие сведения не найдены."
+
+
+def test_layer_stats_facets_and_quality_tools() -> None:
+    stats = server.layer_stats("schools")
+    facets = server.layer_facets("schools", "fns_head_name")
+    summary = server.quality_summary()
+    findings = server.quality_findings(layer="schools")
+
+    assert stats["total"] == 1
+    assert stats["with_phone"] == 1
+    assert facets["items"] == [{"value": "Кузнецов Александр Иванович", "count": 1}]
+    assert summary["total_findings"] >= 0
+    assert "items" in findings
+
+
+def test_mcp_diagnostics_payload() -> None:
+    result = server.mcp_diagnostics()
+
+    assert result["status"] == "ok"
+    assert result["api_status"] == "ok"
+    assert result["version"]["server_version"] == server.SERVER_VERSION
+    assert "layer_stats" in result["tools"]
+    assert result["cache"]["entries"] >= 0
 
 
 def test_search_all_searches_every_available_layer() -> None:
@@ -258,6 +305,7 @@ def test_http_health_and_version_routes() -> None:
     with TestClient(app) as client:
         health = client.get("/mcp-health")
         version = client.get("/mcp-version")
+        diagnostics = client.get("/mcp-diagnostics")
 
     assert health.status_code == 200
     assert health.json()["status"] == "ok"
@@ -267,3 +315,5 @@ def test_http_health_and_version_routes() -> None:
     assert version.status_code == 200
     assert version.json()["server_version"] == server.SERVER_VERSION
     assert "status" not in version.json()
+    assert diagnostics.status_code == 200
+    assert diagnostics.json()["version"]["server_version"] == server.SERVER_VERSION

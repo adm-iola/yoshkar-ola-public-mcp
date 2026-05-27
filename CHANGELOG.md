@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.8 - 2026-05-27
+
+- Added JSON Schema for `layers/*.json` and registry validation.
+- Added `mcp_diagnostics` tool and `/mcp-diagnostics` HTTP endpoint.
+- Added `layer_stats`, `layer_facets`, `quality_summary` and `quality_findings`.
+- Extended `layer_answer_context` with answer type, confidence summary, clarification flag, missing fields and recommended Russian answer.
+
 ## 0.1.7 - 2026-05-27
 
 - Moved layer definitions to JSON registry files under `layers/`.

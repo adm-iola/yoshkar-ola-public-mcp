@@ -1,7 +1,7 @@
 ---
 name: yoshkar-ola-open-data
 description: Use this skill when working with open datasets for the urban district "Город Йошкар-Ола", including currently available schools and kindergartens, and future public datasets exposed through the Yoshkar-Ola Public MCP server.
-version: "0.1.7"
+version: "0.1.8"
 ---
 
 # Открытые данные городского округа "Город Йошкар-Ола"
@@ -9,7 +9,7 @@ version: "0.1.7"
 Используй этот skill, когда пользователь спрашивает о наборах открытых данных
 городского округа "Город Йошкар-Ола".
 
-Версия skill: `0.1.7`.
+Версия skill: `0.1.8`.
 
 Доступные на первом этапе наборы:
 
@@ -45,6 +45,9 @@ version: "0.1.7"
 - Для выбора слоя по вопросу используй `layer_suggest`.
 - Для подготовки ответа модели используй `layer_answer_context`: он возвращает
   факты, источники и правила ответа. Не отвечай сверх этих фактов.
+- Для аналитики и контроля качества используй `layer_stats`, `layer_facets`,
+  `quality_summary` и `quality_findings`.
+- Для диагностики подключения и состояния сервера используй `mcp_diagnostics`.
 - Не отвечай из памяти, если нужные сведения можно получить через MCP.
 - Не добавляй телефоны, адреса, сайты, ФИО, ИНН, лицензии и другие реквизиты,
   которых нет в ответе MCP.

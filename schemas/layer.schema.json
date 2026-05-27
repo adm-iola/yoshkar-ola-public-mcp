@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apiiola.yasg.ru/schemas/layer.schema.json",
+  "title": "Yoshkar-Ola Public MCP Layer",
+  "type": "object",
+  "required": [
+    "id",
+    "display_order",
+    "name",
+    "status",
+    "category",
+    "endpoint",
+    "aliases",
+    "search_fields",
+    "person_fields",
+    "source_fields",
+    "display_fields",
+    "exact_fields",
+    "weighted_fields",
+    "answer_templates"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+    "display_order": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["available", "planned", "disabled"] },
+    "category": { "type": "string", "minLength": 1 },
+    "endpoint": { "type": "string", "minLength": 1 },
+    "aliases": { "type": "array", "items": { "type": "string" } },
+    "search_fields": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "person_fields": { "type": "array", "items": { "type": "string" } },
+    "source_fields": { "type": "array", "items": { "type": "string" } },
+    "display_fields": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "exact_fields": { "type": "array", "items": { "type": "string" } },
+    "weighted_fields": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 1 }
+    },
+    "answer_templates": {
+      "type": "object",
+      "required": ["single", "multiple"],
+      "additionalProperties": false,
+      "properties": {
+        "single": { "type": "string", "minLength": 1 },
+        "multiple": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

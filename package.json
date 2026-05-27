@@ -1,6 +1,6 @@
 {
   "name": "@iola_adm/yoshkar-ola-public-mcp",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "STDIO launcher for the Yoshkar-Ola Public MCP remote server.",
   "license": "MIT",
   "homepage": "https://github.com/adm-iola/yoshkar-ola-public-mcp#readme",
@@ -19,6 +19,7 @@
     "npm/scripts",
     "npm/test",
     "layers",
+    "schemas",
     "skills/yoshkar-ola-open-data",
     "docs/assets/icons",
     "docs/assets/readme-header.png",
