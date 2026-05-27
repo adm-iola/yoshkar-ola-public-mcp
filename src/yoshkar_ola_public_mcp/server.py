@@ -14,8 +14,8 @@ from starlette.responses import JSONResponse
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
-SERVER_VERSION = "0.1.8"
-SKILL_VERSION = "0.1.8"
+SERVER_VERSION = "0.1.9"
+SKILL_VERSION = "0.1.9"
 CONTRACT_VERSION = "2026-05-27"
 NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
 GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"

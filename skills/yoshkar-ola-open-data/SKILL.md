@@ -1,7 +1,7 @@
 ---
 name: yoshkar-ola-open-data
 description: Use this skill when working with open datasets for the urban district "Город Йошкар-Ола", including currently available schools and kindergartens, and future public datasets exposed through the Yoshkar-Ola Public MCP server.
-version: "0.1.8"
+version: "0.1.9"
 ---
 
 # Открытые данные городского округа "Город Йошкар-Ола"
@@ -9,7 +9,7 @@ version: "0.1.8"
 Используй этот skill, когда пользователь спрашивает о наборах открытых данных
 городского округа "Город Йошкар-Ола".
 
-Версия skill: `0.1.8`.
+Версия skill: `0.1.9`.
 
 Доступные на первом этапе наборы:
 

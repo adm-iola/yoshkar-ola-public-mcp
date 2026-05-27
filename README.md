@@ -4,9 +4,32 @@
 
 # MCP-сервер открытых данных Йошкар-Олы
 
-<p>
-  <a href="https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp"><img src="https://img.shields.io/npm/v/%40iola_adm%2Fyoshkar-ola-public-mcp?label=npm" alt="npm package version"></a>
-  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/adm-iola/yoshkar-ola-public-mcp/ci.yml?branch=main&label=tests" alt="tests status"></a>
+<p align="center">
+  <a href="#доступный-endpoint">Endpoint</a>
+  ·
+  <a href="#mcp-инструменты">MCP-инструменты</a>
+  ·
+  <a href="#подключение-в-mcp-клиенте">Подключение</a>
+  ·
+  <a href="#npm-пакет">npm</a>
+  ·
+  <a href="#безопасность">Безопасность</a>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp">
+    <img alt="npm version" src="https://img.shields.io/npm/v/@iola_adm/yoshkar-ola-public-mcp?label=npm">
+  </a>
+  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/ci.yml/badge.svg">
+  </a>
+  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/npm-publish.yml">
+    <img alt="npm publish" src="https://github.com/adm-iola/yoshkar-ola-public-mcp/actions/workflows/npm-publish.yml/badge.svg">
+  </a>
+  <a href="https://github.com/adm-iola/yoshkar-ola-public-mcp/blob/main/LICENSE">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+  <img alt="Node.js 22.5+" src="https://img.shields.io/badge/node-22.5%2B-339933">
 </p>
 
 Публичный MCP-сервер для доступа к открытым данным городского округа

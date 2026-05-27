@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 - 2026-05-27
+
+- Оформлен верх README: навигация, npm version, CI, npm publish, MIT license и Node.js badges.
+- Обновлен тест npm-wrapper, чтобы проверка версии не ломалась при локальном bump перед публикацией.
+
 ## 0.1.8 - 2026-05-27
 
 - Added JSON Schema for `layers/*.json` and registry validation.

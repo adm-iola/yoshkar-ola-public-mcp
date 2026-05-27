@@ -9,6 +9,7 @@ const path = require("node:path");
 const test = require("node:test");
 
 const bin = path.resolve(__dirname, "..", "bin", "yoshkar-ola-public-mcp.js");
+const packageJson = require("../../package.json");
 
 function run(args, env = {}) {
   return new Promise((resolve) => {
@@ -114,7 +115,7 @@ test("check-updates returns JSON with versions", async () => {
 
     assert.equal(result.code, 0);
     const payload = JSON.parse(result.stdout);
-    assert.equal(payload.installed_version, "0.1.8");
+    assert.equal(payload.installed_version, packageJson.version);
     assert.equal(payload.remote_server_version, "0.1.8");
     assert.equal(payload.required_node, ">=22.5.0");
   } finally {
