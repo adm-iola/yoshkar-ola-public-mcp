@@ -1,6 +1,6 @@
 {
   "name": "@iola_adm/yoshkar-ola-public-mcp",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "STDIO launcher for the Yoshkar-Ola Public MCP remote server.",
   "license": "MIT",
   "homepage": "https://github.com/adm-iola/yoshkar-ola-public-mcp#readme",
@@ -16,6 +16,8 @@
   },
   "files": [
     "npm/bin",
+    "npm/scripts",
+    "npm/test",
     "skills/yoshkar-ola-open-data",
     "docs/assets/icons",
     "docs/assets/readme-header.png",
@@ -31,7 +33,8 @@
   },
   "scripts": {
     "start": "node npm/bin/yoshkar-ola-public-mcp.js",
-    "test": "node --check npm/bin/yoshkar-ola-public-mcp.js"
+    "release-check": "node npm/scripts/release-check.js",
+    "test": "node --check npm/bin/yoshkar-ola-public-mcp.js && node --test npm/test/*.test.js && npm run release-check"
   },
   "keywords": [
     "mcp",
@@ -43,6 +46,6 @@
     "mcp-remote": "^0.1.38"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.5.0"
   }
 }

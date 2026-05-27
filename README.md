@@ -28,6 +28,11 @@ Transport:
 streamable-http
 ```
 
+Этот endpoint является обычным публичным remote MCP-сервером. Его можно
+подключать не только в IOLA CLI, но и во внешние MCP-клиенты: Codex,
+Claude Desktop/Code, ChatGPT custom MCP app, OpenAI Responses API и другие
+клиенты с поддержкой streamable HTTP.
+
 Проверка доступности и версии:
 
 ```text
@@ -47,6 +52,9 @@ Python-установки через npm:
 ```bash
 npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
+
+npm-wrapper требует Node.js `>=22.5.0`. Сам remote MCP endpoint от локальной
+версии Node.js пользователя не зависит.
 
 Локальный Codex skill можно установить или обновить одной командой:
 
@@ -259,6 +267,10 @@ yoshkar-ola-public-mcp-stdio
 ```bash
 npx -y @iola_adm/yoshkar-ola-public-mcp
 ```
+
+npm-wrapper нужен только клиентам, которым требуется локальный `stdio`
+процесс. Если клиент умеет подключать remote MCP напрямую, используйте
+`https://apiiola.yasg.ru/mcp` без npm-wrapper.
 
 ## <img src="https://cdn.jsdelivr.net/npm/@iola_adm/yoshkar-ola-public-mcp@latest/docs/assets/icons/chatgpt.svg" alt="" width="24" height="24" align="absmiddle"> Подключение в ChatGPT / OpenAI
 
@@ -504,6 +516,9 @@ node npm/bin/yoshkar-ola-public-mcp.js
 бизнес-логики: он запускает `mcp-remote` и подключает локальный `stdio` к
 публичному endpoint `https://apiiola.yasg.ru/mcp`.
 
+Требуется Node.js `>=22.5.0`. Для локальной разработки можно использовать
+`.nvmrc` или `.node-version` из репозитория.
+
 Пакет опубликован в npm:
 
 ```text
@@ -514,15 +529,27 @@ https://www.npmjs.com/package/@iola_adm/yoshkar-ola-public-mcp
 
 ```bash
 npx -y @iola_adm/yoshkar-ola-public-mcp
+npx -y @iola_adm/yoshkar-ola-public-mcp doctor
+npx -y @iola_adm/yoshkar-ola-public-mcp tools
+npx -y @iola_adm/yoshkar-ola-public-mcp call layer_query '{"layer":"schools","query":"директор Кузнецов","limit":1}'
 npx -y @iola_adm/yoshkar-ola-public-mcp install-skill codex
 npx -y @iola_adm/yoshkar-ola-public-mcp check-updates
 ```
+
+Команды диагностики:
+
+- `doctor` - проверяет Node.js, npm-wrapper, health/version remote MCP,
+  наличие обязательных layer-инструментов и версию локального Codex skill;
+- `tools` - выводит список MCP-инструментов, которые отдает remote endpoint;
+- `call` - вызывает один MCP-инструмент и печатает JSON-ответ, удобно для
+  проверки деплоя и новых слоев.
 
 Проверить пакет локально:
 
 ```bash
 npm install
 npm test
+npm run release-check
 npm pack --dry-run
 ```
 
@@ -530,7 +557,7 @@ npm pack --dry-run
 
 ```bash
 npm adduser
-npm publish --access public
+npm publish --access public --provenance
 ```
 
 Основной процесс публикации описан в `docs/release.md`. Для автоматической

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6 - 2026-05-27
+
+- Raised the npm wrapper runtime requirement to Node.js `>=22.5.0`.
+- Added npm wrapper diagnostics commands: `doctor`, `tools` and `call`.
+- Added Node.js wrapper tests and release version consistency checks.
+- Switched GitHub Actions npm jobs to Node.js 22 and npm provenance publishing.
+
 ## 0.1.5 - 2026-05-27
 
 - Added generic layer MCP tools: `layer_list`, `layer_schema`, `layer_query` and `layer_get`.

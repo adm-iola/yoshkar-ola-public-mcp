@@ -15,6 +15,11 @@ NPM_TOKEN
 
 The token must be allowed to publish `@iola_adm/yoshkar-ola-public-mcp`.
 
+## Runtime
+
+The npm wrapper requires Node.js `>=22.5.0`. CI, publish jobs and local release
+checks must use Node.js 22 or newer.
+
 ## Version checklist
 
 Before creating a release, update the version in:
@@ -37,13 +42,16 @@ npm pack --dry-run
 pytest
 ```
 
+`npm test` includes syntax checks, wrapper tests and `npm run release-check`,
+which verifies that all version files are synchronized.
+
 ## Publish
 
 Create and push a tag matching the package version:
 
 ```bash
-git tag -a v0.1.4 -m "v0.1.4"
-git push origin v0.1.4
+git tag -a v0.1.6 -m "v0.1.6"
+git push origin v0.1.6
 ```
 
 Create a GitHub Release from the tag. The `Publish npm package` workflow will
@@ -54,5 +62,5 @@ publish the package automatically after the release is published.
 If the workflow is unavailable, publish from a trusted local machine:
 
 ```bash
-npm publish --access public
+npm publish --access public --provenance
 ```
