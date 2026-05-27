@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.7 - 2026-05-27
+
+- Moved layer definitions to JSON registry files under `layers/`.
+- Added MCP contract metadata through `get_contract_info`.
+- Added `layer_suggest` and `layer_answer_context` tools for agent routing and RAG context.
+- Improved layer search scoring with matched fields and confidence metadata.
+- Added health metrics, cache hit counters and stale-cache fallback for API outages.
+
 ## 0.1.6 - 2026-05-27
 
 - Raised the npm wrapper runtime requirement to Node.js `>=22.5.0`.

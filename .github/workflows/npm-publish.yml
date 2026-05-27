@@ -73,3 +73,60 @@ jobs:
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: ${{ vars.MCP_DEPLOY_ENABLED == 'true' }}
+    steps:
+      - name: Resolve ref
+        id: ref
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.tag }}
+
+      - name: Set up SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          install -m 600 /dev/null ~/.ssh/mcp_deploy_key
+          printf '%s\n' "${{ secrets.MCP_DEPLOY_SSH_KEY }}" > ~/.ssh/mcp_deploy_key
+          ssh-keyscan -H "${{ secrets.MCP_DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to public gateway
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.MCP_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.MCP_DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.MCP_DEPLOY_PATH }}
+          SERVICE_NAME: ${{ secrets.MCP_DEPLOY_SERVICE }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_USER:=root}"
+          : "${DEPLOY_PATH:=/opt/yoshkar-ola-public-mcp}"
+          : "${SERVICE_NAME:=yoshkar-ola-public-mcp.service}"
+          SSH_OPTS=(-T -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o BatchMode=yes -i ~/.ssh/mcp_deploy_key)
+          tar -cf - . | ssh "${SSH_OPTS[@]}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -e; mkdir -p '${DEPLOY_PATH}'; tar -xf - -C '${DEPLOY_PATH}'; cd '${DEPLOY_PATH}'; .venv/bin/python -m pip install -e .; systemctl restart '${SERVICE_NAME}'; systemctl is-active '${SERVICE_NAME}'"
+
+      - name: Verify deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          VERSION_JSON="$(curl --connect-timeout 10 --max-time 20 -fsS https://apiiola.yasg.ru/mcp-version)"
+          SERVER_VERSION="$(node -e "const payload = JSON.parse(process.argv[1]); console.log(payload.server_version)" "$VERSION_JSON")"
+          if [ "$SERVER_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Remote server version $SERVER_VERSION does not match package version $PACKAGE_VERSION" >&2
+            exit 1
+          fi
+          npx -y . tools | grep -q '^layer_answer_context$'

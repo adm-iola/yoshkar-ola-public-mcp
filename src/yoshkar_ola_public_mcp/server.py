@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 import time
+import json
+from pathlib import Path
 from typing import Any, Literal
 
 import httpx
@@ -12,38 +14,35 @@ from starlette.responses import JSONResponse
 API_BASE_URL = os.getenv("CPR_PUBLIC_API_BASE_URL", "https://apiiola.yasg.ru/api/v1").rstrip("/")
 HTTP_TIMEOUT_SECONDS = float(os.getenv("CPR_PUBLIC_API_TIMEOUT", "20"))
 CACHE_TTL_SECONDS = int(os.getenv("CPR_PUBLIC_API_CACHE_TTL", "300"))
-SERVER_VERSION = "0.1.6"
-SKILL_VERSION = "0.1.6"
+SERVER_VERSION = "0.1.7"
+SKILL_VERSION = "0.1.7"
+CONTRACT_VERSION = "2026-05-27"
 NPM_PACKAGE = "@iola_adm/yoshkar-ola-public-mcp"
 GUIDANCE_RESOURCE_URI = "yoshkar-ola://guidance/open-data"
 LAYERS_RESOURCE_URI = "yoshkar-ola://layers"
+PACKAGE_ROOT = Path(__file__).resolve().parents[2]
+LAYERS_DIR = PACKAGE_ROOT / "layers"
 
 DatasetName = Literal["schools", "kindergartens"]
 
-DATA_LAYERS = (
-    {
-        "id": "schools",
-        "name": "Муниципальные школы",
-        "status": "available",
-        "category": "Образование",
-        "endpoint": "schools",
-        "aliases": ["школ", "лицей", "гимнази"],
-        "search_fields": ["inn", "fns_full_name", "fns_short_name", "fns_head_name", "legal_address", "address", "email", "website"],
-        "person_fields": ["fns_head_name"],
-        "source_fields": ["id", "name", "inn"],
-    },
-    {
-        "id": "kindergartens",
-        "name": "Муниципальные детские сады",
-        "status": "available",
-        "category": "Образование",
-        "endpoint": "kindergartens",
-        "aliases": ["сад", "детсад", "детский сад", "доу", "мбдоу"],
-        "search_fields": ["inn", "fns_full_name", "fns_short_name", "fns_head_name", "legal_address", "address", "email", "website"],
-        "person_fields": ["fns_head_name"],
-        "source_fields": ["id", "name", "inn"],
-    },
-)
+def _load_layer_registry() -> tuple[dict[str, Any], ...]:
+    layers: list[dict[str, Any]] = []
+    for file_path in sorted(LAYERS_DIR.glob("*.json")):
+        with file_path.open("r", encoding="utf-8") as file:
+            layer = json.load(file)
+        layer.setdefault("aliases", [])
+        layer.setdefault("search_fields", [])
+        layer.setdefault("person_fields", [])
+        layer.setdefault("source_fields", ["id", "name", "inn"])
+        layer.setdefault("display_fields", layer["search_fields"])
+        layer.setdefault("exact_fields", ["inn"])
+        layer.setdefault("weighted_fields", {})
+        layer.setdefault("answer_templates", {})
+        layers.append(layer)
+    return tuple(sorted(layers, key=lambda item: (int(item.get("display_order") or 999), str(item.get("id") or ""))))
+
+
+DATA_LAYERS = _load_layer_registry()
 DATA_LAYER_BY_ID = {layer["id"]: layer for layer in DATA_LAYERS}
 
 PUBLIC_FIELDS = (
@@ -74,21 +73,48 @@ PUBLIC_FIELDS = (
 )
 
 _cache: dict[str, tuple[float, Any]] = {}
+_cache_meta: dict[str, dict[str, Any]] = {}
+_metrics: dict[str, Any] = {
+    "started_at": time.time(),
+    "requests": {},
+    "cache": {"hits": 0, "misses": 0, "stale_hits": 0},
+}
+
+
+def _record_metric(name: str, started_at: float, ok: bool) -> None:
+    entry = _metrics["requests"].setdefault(name, {"count": 0, "errors": 0, "total_ms": 0.0, "last_ms": 0.0})
+    elapsed_ms = round((time.time() - started_at) * 1000, 2)
+    entry["count"] += 1
+    entry["total_ms"] = round(entry["total_ms"] + elapsed_ms, 2)
+    entry["last_ms"] = elapsed_ms
+    if not ok:
+        entry["errors"] += 1
 
 
 def _get_json(path: str) -> Any:
     now = time.time()
     cached = _cache.get(path)
     if cached and now - cached[0] < CACHE_TTL_SECONDS:
+        _metrics["cache"]["hits"] += 1
+        _cache_meta[path] = {"cached_at": cached[0], "stale": False}
         return cached[1]
 
     url = f"{API_BASE_URL}/{path.lstrip('/')}"
-    with httpx.Client(timeout=HTTP_TIMEOUT_SECONDS, follow_redirects=True) as client:
-        response = client.get(url, headers={"Accept": "application/json"})
-        response.raise_for_status()
-        data = response.json()
+    _metrics["cache"]["misses"] += 1
+    try:
+        with httpx.Client(timeout=HTTP_TIMEOUT_SECONDS, follow_redirects=True) as client:
+            response = client.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+    except httpx.HTTPError:
+        if cached:
+            _metrics["cache"]["stale_hits"] += 1
+            _cache_meta[path] = {"cached_at": cached[0], "stale": True}
+            return cached[1]
+        raise
 
     _cache[path] = (now, data)
+    _cache_meta[path] = {"cached_at": now, "stale": False}
     return data
 
 
@@ -138,6 +164,7 @@ def _layer_schema(layer_id: str) -> dict[str, Any]:
     layer = DATA_LAYER_BY_ID[layer_id]
     return {
         "id": layer["id"],
+        "display_order": layer.get("display_order"),
         "name": layer["name"],
         "status": layer["status"],
         "category": layer["category"],
@@ -146,6 +173,9 @@ def _layer_schema(layer_id: str) -> dict[str, Any]:
         "search_fields": layer["search_fields"],
         "person_fields": layer["person_fields"],
         "source_fields": layer["source_fields"],
+        "display_fields": layer["display_fields"],
+        "exact_fields": layer["exact_fields"],
+        "weighted_fields": layer["weighted_fields"],
     }
 
 
@@ -172,35 +202,57 @@ def _extract_terms(query: str) -> list[str]:
     return [term for term in cleaned.split() if (term not in stop_words and (len(term) > 2 or term.isdigit()))]
 
 
-def _score_item(item: dict[str, Any], terms: list[str]) -> int:
+def _score_item(item: dict[str, Any], terms: list[str], layer: dict[str, Any] | None = None) -> dict[str, Any]:
     if not terms:
-        return 1
-    haystack = " ".join(str(item.get(field) or "") for field in PUBLIC_FIELDS).casefold()
-    head = str(item.get("fns_head_name") or "").casefold()
+        return {"score": 1, "matched_fields": []}
+    active_layer = layer or {}
+    search_fields = active_layer.get("search_fields") or PUBLIC_FIELDS
+    weighted_fields = active_layer.get("weighted_fields") or {}
+    exact_fields = active_layer.get("exact_fields") or []
     score = 0
+    matched_fields: set[str] = set()
     for term in terms:
-        if term in haystack:
-            score += 1
-        if term in head:
-            score += 5
-    return score
+        for field in search_fields:
+            value = str(item.get(field) or "").casefold()
+            if not value:
+                continue
+            weight = int(weighted_fields.get(field, 1))
+            if field in exact_fields and term == value:
+                score += weight * 3
+                matched_fields.add(field)
+            elif term in value:
+                score += weight
+                matched_fields.add(field)
+    confidence = min(1.0, round(score / max(len(terms) * 10, 1), 2))
+    return {"score": score, "matched_fields": sorted(matched_fields), "confidence": confidence}
 
 
 def _query_layer(layer_id: str, query: str, limit: int = 20) -> dict[str, Any]:
     if layer_id not in DATA_LAYER_BY_ID:
         raise ValueError(f"Unknown layer: {layer_id}")
+    started_at = time.time()
+    ok = False
+    layer = DATA_LAYER_BY_ID[layer_id]
     terms = _extract_terms(query)
-    scored = [
-        {"item": item, "score": _score_item(item, terms)}
-        for item in _load_items(layer_id)
-    ]
+    scored = []
+    for item in _load_items(layer_id):
+        match = _score_item(item, terms, layer)
+        scored.append({"item": item, **match})
     items = [
-        entry["item"]
+        {
+            **entry["item"],
+            "_match": {
+                "score": entry["score"],
+                "confidence": entry["confidence"],
+                "matched_fields": entry["matched_fields"],
+            },
+        }
         for entry in sorted(scored, key=lambda entry: entry["score"], reverse=True)
         if entry["score"] > 0
     ]
     page = _paginate(items, limit=limit, offset=0)
-    return {
+    ok = True
+    result = {
         "layer": _layer_schema(layer_id),
         "query": query,
         "terms": terms,
@@ -208,6 +260,8 @@ def _query_layer(layer_id: str, query: str, limit: int = 20) -> dict[str, Any]:
         "limit": page["limit"],
         "items": page["items"],
     }
+    _record_metric("layer_query", started_at, ok)
+    return result
 
 
 def _get_layer_item(layer_id: str, inn: str = "", query: str = "") -> dict[str, Any]:
@@ -225,6 +279,66 @@ def _get_layer_item(layer_id: str, inn: str = "", query: str = "") -> dict[str, 
     result = _query_layer(layer_id, cleaned_query, limit=1)
     items = result["items"]
     return {"found": bool(items), "item": items[0] if items else None}
+
+
+def _suggest_layers(query: str, limit: int = 5) -> dict[str, Any]:
+    terms = _extract_terms(query)
+    normalized = query.casefold()
+    suggestions = []
+    for layer in DATA_LAYERS:
+        score = 0
+        matched_aliases = []
+        for alias in layer.get("aliases", []):
+            if str(alias).casefold() in normalized:
+                score += 10
+                matched_aliases.append(alias)
+        for term in terms:
+            if term in str(layer.get("name", "")).casefold() or term in str(layer.get("category", "")).casefold():
+                score += 3
+        if score > 0:
+            suggestions.append({
+                "layer": _layer_schema(str(layer["id"])),
+                "score": score,
+                "confidence": min(1.0, round(score / 20, 2)),
+                "matched_aliases": matched_aliases,
+            })
+    suggestions.sort(key=lambda item: item["score"], reverse=True)
+    if not suggestions:
+        suggestions = [{"layer": _layer_schema(str(layer["id"])), "score": 1, "confidence": 0.1, "matched_aliases": []} for layer in DATA_LAYERS]
+    return {"query": query, "total": len(suggestions), "items": suggestions[: max(1, min(int(limit), 20))]}
+
+
+def _answer_context(question: str, layer: str = "", limit: int = 5) -> dict[str, Any]:
+    target_layers = [layer] if layer else [item["layer"]["id"] for item in _suggest_layers(question)["items"]]
+    results = []
+    facts = []
+    for layer_id in target_layers:
+        query_result = _query_layer(layer_id, question, limit=limit)
+        results.append(query_result)
+        for item in query_result["items"]:
+            facts.append({
+                "layer": layer_id,
+                "title": item.get("fns_short_name") or item.get("fns_full_name") or item.get("inn"),
+                "inn": item.get("inn"),
+                "address": item.get("address") or item.get("legal_address"),
+                "phone": item.get("phone"),
+                "email": item.get("email"),
+                "website": item.get("website"),
+                "head": item.get("fns_head_name"),
+                "match": item.get("_match"),
+            })
+    return {
+        "question": question,
+        "contract_version": CONTRACT_VERSION,
+        "layers": target_layers,
+        "facts": facts[: max(1, min(int(limit), 20))],
+        "sources": [{"type": "mcp", "server": "Yoshkar-Ola Public Data", "endpoint": "https://apiiola.yasg.ru/mcp"}],
+        "results": results,
+        "answer_guidance": (
+            "Отвечай только на основе facts/results. Если facts пустой, скажи, что в доступных открытых данных сведения не найдены. "
+            "Не добавляй реквизиты, которых нет в MCP-ответе."
+        ),
+    }
 
 
 def _paginate(items: list[dict[str, Any]], limit: int, offset: int) -> dict[str, Any]:
@@ -257,9 +371,11 @@ def _version_payload() -> dict[str, Any]:
         "server_name": "Yoshkar-Ola Public Data",
         "server_version": SERVER_VERSION,
         "skill_version": SKILL_VERSION,
+        "contract_version": CONTRACT_VERSION,
         "npm_package": NPM_PACKAGE,
         "mcp_endpoint": "https://apiiola.yasg.ru/mcp",
         "data_layers": list(DATA_LAYERS),
+        "capabilities": ["layer_list", "layer_schema", "layer_suggest", "layer_query", "layer_get", "layer_answer_context"],
     }
 
 
@@ -325,6 +441,19 @@ def get_server_info() -> dict[str, Any]:
 
 
 @mcp.tool
+def get_contract_info() -> dict[str, Any]:
+    """Получить версию MCP-контракта и список поддерживаемых универсальных возможностей."""
+    return {
+        "contract_version": CONTRACT_VERSION,
+        "server_version": SERVER_VERSION,
+        "skill_version": SKILL_VERSION,
+        "resources": [GUIDANCE_RESOURCE_URI, LAYERS_RESOURCE_URI],
+        "tools": ["layer_list", "layer_schema", "layer_suggest", "layer_query", "layer_get", "layer_answer_context"],
+        "layer_count": len(DATA_LAYERS),
+    }
+
+
+@mcp.tool
 def list_data_layers() -> dict[str, Any]:
     """Получить список доступных открытых слоев данных."""
     return {
@@ -350,6 +479,12 @@ def layer_schema(layer: str) -> dict[str, Any]:
 
 
 @mcp.tool
+def layer_suggest(query: str, limit: int = 5) -> dict[str, Any]:
+    """Подобрать наиболее подходящие слои данных для вопроса пользователя."""
+    return _suggest_layers(query=query, limit=limit)
+
+
+@mcp.tool
 def layer_query(layer: str, query: str, limit: int = 20) -> dict[str, Any]:
     """Найти записи в универсальном слое данных по текстовому запросу."""
     return _query_layer(layer, query=query, limit=limit)
@@ -359,6 +494,12 @@ def layer_query(layer: str, query: str, limit: int = 20) -> dict[str, Any]:
 def layer_get(layer: str, inn: str = "", query: str = "") -> dict[str, Any]:
     """Получить одну запись универсального слоя по ИНН или ближайшему текстовому совпадению."""
     return _get_layer_item(layer, inn=inn, query=query)
+
+
+@mcp.tool
+def layer_answer_context(question: str, layer: str = "", limit: int = 5) -> dict[str, Any]:
+    """Подготовить компактный RAG-контекст с фактами и источниками для ответа модели."""
+    return _answer_context(question=question, layer=layer, limit=limit)
 
 
 @mcp.tool
@@ -419,7 +560,12 @@ def open_data_guidance_prompt() -> str:
 
 @mcp.custom_route("/mcp-health", methods=["GET"], include_in_schema=False)
 async def mcp_health(_: Request) -> JSONResponse:
-    return JSONResponse({"status": "ok", **_version_payload()})
+    api_status = "ok"
+    try:
+        _get_json(_dataset_path(str(DATA_LAYERS[0]["id"])))
+    except Exception:
+        api_status = "error"
+    return JSONResponse({"status": "ok" if api_status == "ok" else "degraded", "api_status": api_status, "metrics": _metrics, **_version_payload()})
 
 
 @mcp.custom_route("/mcp-version", methods=["GET"], include_in_schema=False)

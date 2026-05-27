@@ -15,6 +15,29 @@ NPM_TOKEN
 
 The token must be allowed to publish `@iola_adm/yoshkar-ola-public-mcp`.
 
+Optional deployment uses the same release workflow after npm publish. Enable it
+with repository variable:
+
+```text
+MCP_DEPLOY_ENABLED=true
+```
+
+Then add repository secrets:
+
+```text
+MCP_DEPLOY_HOST
+MCP_DEPLOY_USER
+MCP_DEPLOY_SSH_KEY
+MCP_DEPLOY_PATH
+MCP_DEPLOY_SERVICE
+```
+
+Defaults are `root`, `/opt/yoshkar-ola-public-mcp` and
+`yoshkar-ola-public-mcp.service` for user, path and service when the
+corresponding optional secrets are empty. The deploy job uploads the release
+tree with `tar | ssh`, installs the Python package in the existing venv,
+restarts systemd and verifies `/mcp-version` plus MCP tools.
+
 ## Runtime
 
 The npm wrapper requires Node.js `>=22.5.0`. CI, publish jobs and local release
@@ -55,7 +78,9 @@ git push origin v0.1.6
 ```
 
 Create a GitHub Release from the tag. The `Publish npm package` workflow will
-publish the package automatically after the release is published.
+publish the package automatically after the release is published. If
+`MCP_DEPLOY_ENABLED=true`, the same workflow also deploys the remote MCP server
+and verifies the public endpoint.
 
 ## Manual fallback
 

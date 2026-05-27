@@ -133,8 +133,19 @@ def test_version_payload_is_shared_by_server_info_and_http_routes() -> None:
 
     assert payload["server_version"] == server.SERVER_VERSION
     assert payload["skill_version"] == server.SKILL_VERSION
+    assert payload["contract_version"] == server.CONTRACT_VERSION
     assert payload["npm_package"] == "@iola_adm/yoshkar-ola-public-mcp"
     assert [layer["id"] for layer in payload["data_layers"]] == ["schools", "kindergartens"]
+    assert "layer_answer_context" in payload["capabilities"]
+
+
+def test_contract_info_exposes_layer_capabilities() -> None:
+    result = server.get_contract_info()
+
+    assert result["contract_version"] == server.CONTRACT_VERSION
+    assert result["layer_count"] == 2
+    assert "layer_suggest" in result["tools"]
+    assert server.LAYERS_RESOURCE_URI in result["resources"]
 
 
 def test_list_data_layers_returns_available_layers() -> None:
@@ -161,6 +172,8 @@ def test_layer_schema_returns_one_layer() -> None:
     assert result["id"] == "schools"
     assert result["category"] == "Образование"
     assert "школ" in result["aliases"]
+    assert "display_fields" in result
+    assert result["weighted_fields"]["fns_head_name"] == 10
 
 
 def test_layer_query_scores_head_name_matches() -> None:
@@ -170,6 +183,8 @@ def test_layer_query_scores_head_name_matches() -> None:
     assert result["terms"] == ["кузнецов"]
     assert result["total"] == 1
     assert result["items"][0]["inn"] == "1215066204"
+    assert result["items"][0]["_match"]["confidence"] > 0
+    assert "fns_head_name" in result["items"][0]["_match"]["matched_fields"]
 
 
 def test_layer_get_returns_by_inn_or_query() -> None:
@@ -184,6 +199,22 @@ def test_layer_get_returns_by_inn_or_query() -> None:
 
 def test_open_data_layers_resource_matches_layer_list() -> None:
     assert server.open_data_layers_resource() == server.layer_list()
+
+
+def test_layer_suggest_routes_school_questions() -> None:
+    result = server.layer_suggest("в какой школе директор Кузнецов")
+
+    assert result["items"][0]["layer"]["id"] == "schools"
+    assert result["items"][0]["confidence"] > 0
+
+
+def test_layer_answer_context_returns_facts_and_guidance() -> None:
+    result = server.layer_answer_context("в какой школе директор Кузнецов", limit=2)
+
+    assert result["contract_version"] == server.CONTRACT_VERSION
+    assert result["facts"][0]["layer"] == "schools"
+    assert result["facts"][0]["head"] == "Кузнецов Александр Иванович"
+    assert "Не добавляй реквизиты" in result["answer_guidance"]
 
 
 def test_search_all_searches_every_available_layer() -> None:
@@ -230,6 +261,8 @@ def test_http_health_and_version_routes() -> None:
 
     assert health.status_code == 200
     assert health.json()["status"] == "ok"
+    assert health.json()["api_status"] == "ok"
+    assert "metrics" in health.json()
     assert health.json()["server_version"] == server.SERVER_VERSION
     assert version.status_code == 200
     assert version.json()["server_version"] == server.SERVER_VERSION

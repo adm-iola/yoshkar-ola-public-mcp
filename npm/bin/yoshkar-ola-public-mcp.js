@@ -221,7 +221,7 @@ async function doctor() {
     health: null,
     version: null,
     tools: [],
-    required_layer_tools: ["layer_list", "layer_schema", "layer_query", "layer_get"],
+    required_layer_tools: ["layer_list", "layer_schema", "layer_suggest", "layer_query", "layer_get", "layer_answer_context"],
     required_layer_tools_ok: false,
     codex_skill_path: codexSkillTarget(),
     codex_skill_version: readSkillVersion(codexSkillTarget()),

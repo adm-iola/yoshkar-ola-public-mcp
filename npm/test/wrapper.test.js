@@ -25,8 +25,8 @@ function mockMcpServer() {
   const server = createServer((request, response) => {
     const basePayload = {
       server_name: "Yoshkar-Ola Public Data",
-      server_version: "0.1.6",
-      skill_version: "0.1.6",
+      server_version: "0.1.7",
+      skill_version: "0.1.7",
       npm_package: "@iola_adm/yoshkar-ola-public-mcp",
       mcp_endpoint: "",
       data_layers: [],
@@ -57,8 +57,10 @@ function mockMcpServer() {
             tools: [
               { name: "layer_list" },
               { name: "layer_schema" },
+              { name: "layer_suggest" },
               { name: "layer_query" },
               { name: "layer_get" },
+              { name: "layer_answer_context" },
             ],
           };
         }
@@ -107,8 +109,8 @@ test("check-updates returns JSON with versions", async () => {
 
     assert.equal(result.code, 0);
     const payload = JSON.parse(result.stdout);
-    assert.equal(payload.installed_version, "0.1.6");
-    assert.equal(payload.remote_server_version, "0.1.6");
+    assert.equal(payload.installed_version, "0.1.7");
+    assert.equal(payload.remote_server_version, "0.1.7");
     assert.equal(payload.required_node, ">=22.5.0");
   } finally {
     await server.close();

@@ -1,0 +1,28 @@
+{
+  "id": "kindergartens",
+  "display_order": 2,
+  "name": "Муниципальные детские сады",
+  "status": "available",
+  "category": "Образование",
+  "endpoint": "kindergartens",
+  "aliases": ["сад", "детсад", "детский сад", "доу", "мбдоу"],
+  "search_fields": ["inn", "fns_full_name", "fns_short_name", "fns_head_name", "legal_address", "address", "email", "website"],
+  "person_fields": ["fns_head_name"],
+  "source_fields": ["id", "name", "inn"],
+  "display_fields": ["fns_short_name", "address", "phone", "email", "website", "inn", "fns_head_name"],
+  "exact_fields": ["inn"],
+  "weighted_fields": {
+    "inn": 12,
+    "fns_short_name": 8,
+    "fns_full_name": 6,
+    "fns_head_name": 10,
+    "legal_address": 4,
+    "address": 4,
+    "email": 2,
+    "website": 2
+  },
+  "answer_templates": {
+    "single": "Используй только найденные поля записи детского сада. Если пользователь спрашивает руководителя, укажи fns_head_name и fns_head_position.",
+    "multiple": "Покажи короткий список детских садов и предложи уточнить нужную запись."
+  }
+}
